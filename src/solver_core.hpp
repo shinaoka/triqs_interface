@@ -13,21 +13,32 @@
 #include <triqs/operators/many_body_operator.hpp>
 #include <triqs/statistics/histograms.hpp>
 #include "solve_parameters.hpp"
-#include "atom_diag.hpp"
-#include "atom_diag_functions.hpp"
+//#include "atom_diag.hpp"
+//#include "atom_diag_functions.hpp"
 
 namespace alps_cthyb {
 
 using namespace triqs::utility;
 using namespace triqs::statistics;
+using namespace triqs::gfs;
 using histo_map_t = std::map<std::string, histogram>;
 using indices_type = triqs::operators::indices_t;
+//using triqs::gfs::matrix_valued;
+//using triqs::gfs::matrix_real_valued;
+
+using det_scalar_t = std::complex<double>;
+using delta_target_t =  matrix_valued;
+using h_scalar_t = std::complex<double>; // type of scalar for H_loc
+using mc_weight_t = decltype(h_scalar_t{} * det_scalar_t{});                     // complex iif either is complex
+using many_body_op_t = triqs::operators::many_body_operator_generic<h_scalar_t>; // Operator with real or complex value
+using matrix_t =  triqs::arrays::matrix<h_scalar_t>;
+using g_target_t = std14::conditional_t<triqs::is_complex<mc_weight_t>::value, matrix_valued, matrix_real_valued>;
 
 /**  DOC OF SOLVER CORE*/
 class solver_core {
 
  double beta;                                   // inverse temperature
- atom_diag h_diag;                              // diagonalization of the local problem
+ //atom_diag h_diag;                              // diagonalization of the local problem
  std::map<std::string, indices_type> gf_struct; // Block structure of the Green function FIXME
  many_body_op_t _h_loc;                         // The local Hamiltonian = h_int + h0
  block_gf<imfreq> _G0_iw;                       // Green's function containers: imaginary-freq Green's functions
@@ -69,22 +80,22 @@ class solver_core {
  block_gf_view<legendre> G_l() { return _G_l; }
 
  /// Atomic G(tau) in imaginary time
- block_gf_view<imtime> atomic_gf() const { return ::cthyb::atomic_gf(h_diag, beta, gf_struct, _G_tau[0].mesh().size()); }
+ //block_gf_view<imtime> atomic_gf() const { return ::cthyb::atomic_gf(h_diag, beta, gf_struct, _G_tau[0].mesh().size()); }
 
  /// Density matrix
  std::vector<matrix_t> const & density_matrix() const { return _density_matrix;}
 
  /// Diagonalization of h_loc
- atom_diag const & h_loc_diagonalization() const { return h_diag;}
+ //atom_diag const & h_loc_diagonalization() const { return h_diag;}
 
  /// Histogram of the total perturbation order
- histogram const& get_perturbation_order_total() const { return _pert_order_total; }
+ //histogram const& get_perturbation_order_total() const { return _pert_order_total; }
 
  /// Histograms of the perturbation order for each block
- histo_map_t const& get_perturbation_order() const { return _pert_order; }
+ //histo_map_t const& get_perturbation_order() const { return _pert_order; }
 
  /// Histograms related to the performance analysis
- histo_map_t const& get_performance_analysis() const { return _performance_analysis; }
+ //histo_map_t const& get_performance_analysis() const { return _performance_analysis; }
 
  /// Monte Carlo average sign
  mc_weight_t average_sign() const { return _average_sign; }

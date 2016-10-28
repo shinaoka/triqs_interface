@@ -1,7 +1,7 @@
 #pragma once
 #include "./config.hpp"
 
-namespace cthyb {
+namespace alps_cthyb {
 
 using namespace triqs::operators;
 using indices_map_t = std::map<triqs::operators::indices_t,triqs::operators::indices_t>;

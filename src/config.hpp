@@ -32,7 +32,7 @@
 //#cmakedefine HYBRIDISATION_IS_COMPLEX
 //#cmakedefine LOCAL_HAMILTONIAN_IS_COMPLEX
 
-namespace cthyb {
+namespace alps_cthyb {
 
 using namespace triqs::arrays;
 using namespace triqs::gfs;
