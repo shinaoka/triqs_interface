@@ -23,8 +23,6 @@ using namespace triqs::statistics;
 using namespace triqs::gfs;
 using histo_map_t = std::map<std::string, histogram>;
 using indices_type = triqs::operators::indices_t;
-//using triqs::gfs::matrix_valued;
-//using triqs::gfs::matrix_real_valued;
 
 using det_scalar_t = std::complex<double>;
 using delta_target_t =  matrix_valued;

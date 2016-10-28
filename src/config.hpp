@@ -25,12 +25,9 @@
 #include <vector>
 #include <map>
 #include <triqs/operators/many_body_operator.hpp>
-#include <triqs/hilbert_space/state.hpp>
-#include <triqs/hilbert_space/imperative_operator.hpp>
-#include "./array_suppl.hpp"
-
-//#cmakedefine HYBRIDISATION_IS_COMPLEX
-//#cmakedefine LOCAL_HAMILTONIAN_IS_COMPLEX
+//#include <triqs/hilbert_space/state.hpp>
+//#include <triqs/hilbert_space/imperative_operator.hpp>
+//#include "./array_suppl.hpp"
 
 namespace alps_cthyb {
 
@@ -40,22 +37,13 @@ using namespace triqs::hilbert_space;
 namespace h5 = triqs::h5;
 namespace operators = triqs::operators;
 
-using std::isfinite;
-inline bool isfinite(dcomplex const &x) { return std::isfinite(real(x)) && std::isfinite(imag(x)); }
-
-inline double real(double x) { return x; }
-inline double imag(double x) { return 0; }
-
-// FIXME when moved into the lib, we have to template of h_scalar_t = double and complex
-// consider moving this into the class, under the template
-
 using det_scalar_t = dcomplex;
 using delta_target_t = matrix_valued;
 
 using h_scalar_t = dcomplex; // type of scalar for H_loc: double or complex.
 
-using mc_weight_t = decltype(h_scalar_t{} * det_scalar_t{});                     // complex iif either is complex
+using mc_weight_t =dcomplex;
 using many_body_op_t = triqs::operators::many_body_operator_generic<h_scalar_t>; // Operator with real or complex value
 using matrix_t = matrix<h_scalar_t>;
-using g_target_t = std14::conditional_t<triqs::is_complex<mc_weight_t>::value, matrix_valued, matrix_real_valued>;
+using g_target_t = matrix_valued;
 }
