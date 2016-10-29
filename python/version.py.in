@@ -1,0 +1,7 @@
+#FIX ME: INCLUDE HASH IN THE MESSAGE 
+
+def show_version():
+  print "\nYou are using the ALPS cthyb solver"
+
+def show_git_hash():
+  print "\nYou are using the ALPS cthyb solver"
