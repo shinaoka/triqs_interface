@@ -13,6 +13,7 @@
 #include <triqs/operators/many_body_operator.hpp>
 #include <triqs/statistics/histograms.hpp>
 #include "solve_parameters.hpp"
+#include "config.hpp"
 //#include "atom_diag.hpp"
 //#include "atom_diag_functions.hpp"
 
@@ -23,14 +24,6 @@ using namespace triqs::statistics;
 using namespace triqs::gfs;
 using histo_map_t = std::map<std::string, histogram>;
 using indices_type = triqs::operators::indices_t;
-
-using det_scalar_t = std::complex<double>;
-using delta_target_t =  matrix_valued;
-using h_scalar_t = std::complex<double>; // type of scalar for H_loc
-using mc_weight_t = decltype(h_scalar_t{} * det_scalar_t{});                     // complex iif either is complex
-using many_body_op_t = triqs::operators::many_body_operator_generic<h_scalar_t>; // Operator with real or complex value
-using matrix_t =  triqs::arrays::matrix<h_scalar_t>;
-using g_target_t = std14::conditional_t<triqs::is_complex<mc_weight_t>::value, matrix_valued, matrix_real_valued>;
 
 /**  DOC OF SOLVER CORE*/
 class solver_core {

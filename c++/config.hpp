@@ -40,9 +40,9 @@ namespace operators = triqs::operators;
 using det_scalar_t = dcomplex;
 using delta_target_t = matrix_valued;
 
-using h_scalar_t = dcomplex; // type of scalar for H_loc: double or complex.
+using h_scalar_t = det_scalar_t; // type of scalar for H_loc: double or complex.
 
-using mc_weight_t =dcomplex;
+using mc_weight_t = h_scalar_t;
 using many_body_op_t = triqs::operators::many_body_operator_generic<h_scalar_t>; // Operator with real or complex value
 using matrix_t = matrix<h_scalar_t>;
 using g_target_t = matrix_valued;

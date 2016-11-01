@@ -18,18 +18,21 @@ module.add_preamble("""
 #include <triqs/python_tools/converters/map.hpp>
 #include <triqs/python_tools/converters/vector.hpp>
 #include <triqs/python_tools/converters/variant.hpp>
+#include <triqs/python_tools/converters/tuple.hpp>
+#include <triqs/python_tools/converters/operators_real_complex.hpp>
+#include <triqs/python_tools/converters/fundamental_operator_set.hpp>
 #include <triqs/python_tools/converters/arrays.hpp>
 using namespace triqs::gfs;
 using triqs::operators::many_body_operator;
 using namespace alps_cthyb;
-#include "./pytriqs.applications.impurity_solvers.alps_cthyb_converters.hxx"
+#include "./alps_cthyb_converters.hxx"
 """)
 
 # The class solver_core
 c = class_(
         py_type = "SolverCore",  # name of the python class
         c_type = "solver_core",   # name of the C++ class
-        doc = r"DOC OF SOLVER CORE",   # doc of the C++ class
+        doc = r"Core class of the ALPS cthyb solver",   # doc of the C++ class
 )
 
 c.add_constructor("""(double beta, std::map<std::string,indices_type> gf_struct, int n_iw = 1025, int n_tau = 10001, int n_l = 50)""",
