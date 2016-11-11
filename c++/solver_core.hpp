@@ -27,14 +27,14 @@ using indices_type = triqs::operators::indices_t;
 
 /**  DOC OF SOLVER CORE*/
 class solver_core {
-
+ int num_flavors;
  double beta;                                   // inverse temperature
  //atom_diag h_diag;                              // diagonalization of the local problem
  std::map<std::string, indices_type> gf_struct; // Block structure of the Green function FIXME
  many_body_op_t _h_loc;                         // The local Hamiltonian = h_int + h0
  block_gf<imfreq> _G0_iw;                       // Green's function containers: imaginary-freq Green's functions
  block_gf<imtime> _Delta_tau, _G_tau;           // Green's function containers: imaginary-time Green's functions
- //block_gf<imtime, g_target_t> _G_tau_accum;     // Intermediate object to accumulate g(tau), either real or complex
+ block_gf<imtime, g_target_t> _G_tau_accum;     // Intermediate object to accumulate g(tau), either real or complex
  block_gf<legendre> _G_l;                       // Green's function containers: Legendre coefficients
  histogram _pert_order_total;                   // Histogram of the total perturbation order
  histo_map_t _pert_order;                       // Histograms of the perturbation order for each block

@@ -23,7 +23,7 @@ r"""
 DOC
 
 """
-from cthyb_solver import Solver
-from cthyb import SolverCore, AtomDiag, quantum_number_eigenvalues, trace_rho_op, act, atomic_gf
+from alps_cthyb_solver import Solver
+from alps_cthyb import SolverCore
 
-__all__ = ['Solver', 'SolverCore', 'AtomDiag', 'quantum_number_eigenvalues', 'trace_rho_op', 'act','atomic_gf']
+__all__ = ['Solver', 'SolverCore']

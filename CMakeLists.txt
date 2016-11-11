@@ -10,6 +10,11 @@ enable_testing()
 # Load TRIQS, including all predefined variables from TRIQS installation
 find_package(TRIQS REQUIRED)
 
+# Load ALPSCore. If ALPSCore is not found
+# automatically, specify its location using:
+# export ALPSCore_DIR=/location/to/ALPSCORE/
+find_package(ALPSCore REQUIRED)
+
 # We want to be installed in the TRIQS tree
 set(CMAKE_INSTALL_PREFIX ${TRIQS_PATH})
 
