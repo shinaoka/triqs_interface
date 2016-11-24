@@ -40,7 +40,7 @@ class Solver(SolverCore):
     def solve(self, **params_kw):
         """
         Solve the impurity problem.
-        If ``measure_g_tau`` (default = ``True``), ``G_iw`` and ``Sigma_iw`` will be calculated and their tails fitted.
+        ``G_iw`` and ``Sigma_iw`` will be calculated and their tails fitted.
         In addition to the solver parameters, parameters to control the tail fitting can be provided.
 
         Parameters
@@ -96,7 +96,7 @@ class Solver(SolverCore):
 
         # Post-processing:
         # (only supported for G_tau, to permit compatibility with dft_tools)
-        if perform_post_proc and (self.last_solve_parameters["measure_g_tau"] == True):
+        if perform_post_proc:
             # Fourier transform G_tau to obtain G_iw
             for name, g in self.G_tau: self.G_iw[name] << Fourier(g)
             # Solve Dyson's eq to obtain Sigma_iw and G_iw and fit the tail

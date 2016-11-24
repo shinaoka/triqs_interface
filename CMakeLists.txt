@@ -14,6 +14,7 @@ find_package(TRIQS REQUIRED)
 # automatically, specify its location using:
 # export ALPSCore_DIR=/location/to/ALPSCORE/
 find_package(ALPSCore REQUIRED)
+find_package(ALPSCoreCTHYB REQUIRED)
 
 # We want to be installed in the TRIQS tree
 set(CMAKE_INSTALL_PREFIX ${TRIQS_PATH})
@@ -23,7 +24,7 @@ message(STATUS "TRIQS : Adding compilation flags detected by the library (C++11/
 add_definitions(${TRIQS_CXX_DEFINITIONS})
 
 # Options for the compilation ...
-#option(Tests "Enable Tests" ON)
+#target_link_libraries(alps_cthyb ${ALPSCore_LIBRARIES} ${ALPSCoreCTHYB_LIBRARIES})
 
 include_directories(${CMAKE_BINARY_DIR}/c++ c++)
 

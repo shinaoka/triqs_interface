@@ -12,6 +12,13 @@
 #include <triqs/utility/callbacks.hpp>
 #include <triqs/operators/many_body_operator.hpp>
 #include <triqs/statistics/histograms.hpp>
+
+#include <alps/params.hpp>
+
+#include <alps/cthyb/solver.hpp>
+
+#include <boost/multi_array.hpp>
+
 #include "solve_parameters.hpp"
 #include "config.hpp"
 //#include "atom_diag.hpp"
@@ -28,6 +35,9 @@ using indices_type = triqs::operators::indices_t;
 /**  DOC OF SOLVER CORE*/
 class solver_core {
  int num_flavors;
+ int n_iw_;
+ int n_tau_;
+ int n_l_;
  double beta;                                   // inverse temperature
  //atom_diag h_diag;                              // diagonalization of the local problem
  std::map<std::string, indices_type> gf_struct; // Block structure of the Green function FIXME

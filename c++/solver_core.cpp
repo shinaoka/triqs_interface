@@ -19,7 +19,7 @@ solver_core::solver_core(double beta_,
                          int n_iw,
                          int n_tau,
                          int n_l) :
-    beta(beta_), gf_struct(gf_struct_), num_flavors(0) {
+    beta(beta_), gf_struct(gf_struct_), num_flavors(0), n_iw_(n_iw), n_tau_(n_tau), n_l_(n_l) {
 
   if (n_tau < 2 * n_iw) {
     TRIQS_RUNTIME_ERROR << "Must use as least twice as many tau points as Matsubara frequencies: n_iw = " << n_iw
@@ -66,6 +66,7 @@ solver_core::solver_core(double beta_,
 //}
 
 void solver_core::solve(solve_parameters_t const &params) {
+  using variant_int_string = triqs::utility::variant_int_string;
 
   _last_solve_parameters = params;
 
@@ -73,21 +74,27 @@ void solver_core::solve(solve_parameters_t const &params) {
   fundamental_operator_set fops;
   for (auto const &bl: gf_struct) {
     for (auto const &a: bl.second) {
-      std::cout << "debug " << bl.first << " " << a << std::endl;
+      std::cout << "debug : " << bl.first << " : " << bl.second << " : " << a << std::endl;
       fops.insert(bl.first, a);
     }
   }
 
+  std::cout << "num_flavors " << num_flavors << std::endl;
+
   // setup the linear index map
   std::map<std::pair<int, int>, int> linindex;
+  std::map<std::pair<variant_int_string, variant_int_string>, int> linindex2;
   int block_index = 0;
+  int flavor_index = 0;
   for (auto const &bl: gf_struct) {
     int inner_index = 0;
     for (auto const &a: bl.second) {
       linindex[std::make_pair(block_index, inner_index)] = fops[{bl.first, a}];
-      inner_index++;
+      linindex2[std::make_pair(variant_int_string(bl.first), a)] = flavor_index;
+      ++ flavor_index;
+      ++ inner_index;
     }
-    block_index++;
+    ++ block_index;
   }
 
   // Make list of block sizes
@@ -100,7 +107,39 @@ void solver_core::solve(solve_parameters_t const &params) {
   auto G0_iw_inv = map([](gf_const_view<imfreq> x) { return triqs::gfs::inverse(x); }, _G0_iw);
   auto Delta_iw = G0_iw_inv;
 
-  _h_loc = params.h_int;
+  //Compute Coulomb tensor
+  std::cout << "h_loc " << params.h_int << std::endl;
+  boost::multi_array<std::complex<double>, 4> Uijkl(boost::extents[num_flavors][num_flavors][num_flavors][num_flavors]);
+  std::fill(Uijkl.origin(), Uijkl.origin() + Uijkl.num_elements(), 0.0);
+  for (auto it = _h_loc.cbegin(); it != _h_loc.cend(); ++it) {
+    if (it->coef == 0.0) {
+      continue;
+    }
+    auto num_ops = std::distance(it->monomial.cbegin(), it->monomial.cend());
+    if (num_ops != 4) {
+      std::stringstream ss;
+      ss << "Unsupported interaction term: " << it->monomial;
+      TRIQS_RUNTIME_ERROR << ss.str();
+    }
+    auto iop = 0;
+    boost::array<int,4> indices;
+    for (auto it_op = it->monomial.cbegin(); it_op != it->monomial.cend(); ++it_op) {
+      if ((iop < num_ops/2 && !it_op->dagger)
+          || (iop >= num_ops/2 && it_op->dagger)
+          || std::distance(it_op->indices.cbegin(), it_op->indices.cend()) != 2) {
+        std::stringstream ss;
+        ss << "Unsupported interaction term: " << it->monomial;
+        TRIQS_RUNTIME_ERROR << ss.str();
+      }
+      indices[iop] = linindex2[std::make_pair(it_op->indices[0], it_op->indices[1])];
+      ++ iop;
+    }
+    Uijkl[indices[0]][indices[1]][indices[2]][indices[3]] = it->coef;
+  }
+  {
+    std::vector<std::complex<double> > Uijkl_vec(Uijkl.num_elements());
+    std::copy(Uijkl.origin(), Uijkl.origin() + Uijkl.num_elements(), Uijkl_vec.begin());
+  }
 
   // Do I have imaginary components in my local Hamiltonian?
   auto max_imag = 0.0;
@@ -126,6 +165,7 @@ void solver_core::solve(solve_parameters_t const &params) {
         }
         _h_loc = _h_loc + e_ij * c_dag<h_scalar_t>(bl.first, a1) * c<h_scalar_t>(bl.first, a2);
         //h_loc_vec[(n1 + offset) * num_flavors + (n2 + offset)] = ;
+        std::cout << linindex[std::make_pair(b, n1)] << "  "  << linindex[std::make_pair(b,n2)] << " " << e_ij << std::endl;
         n2++;
       }
       n1++;
@@ -150,7 +190,35 @@ void solver_core::solve(solve_parameters_t const &params) {
     b++;
   }
 
-  // Perform a Monte Carlo simulation
+  // Determine which solver to be used the real-number solver or the complex-number solver
+  alps::params par;
+  boost::shared_ptr<alps::cthyb::Solver> p_solver;
+  alps::cthyb::MatrixSolver<std::complex<double> >::define_parameters(par);
+  //if (par.help_requested(std::cout)) { exit(0); } //If help message is requested, print it and exit normally.
+
+  // Set parameters for ALPS CT-HYB solver
+  par["timelimit"] = params.max_time > 0 ? params.max_time : 1E+30;
+  par["verbose"] = params.verbosity == 0 ? 0 : 1;
+
+  par["model.sites"] = num_flavors;
+  par["model.spins"] = 1;
+  par["model.beta"] = beta;
+  par["model.n_tau_hyb"] = n_tau_;
+  par["model.coulomb_tensor"] = 0;
+  par["model.hopping_matrix"] = 0;
+  par["model.delta"] = 0;
+
+  par["measurement.G1.n_legendre"] = n_l_;
+  par["measurement.G1.n_tau"] = n_tau_;
+  par["measurement.G1.n_iw"] = n_iw_;
+
+  //int n_iw,
+  //int n_tau,
+  //int n_l) :
+
+  p_solver.reset(new alps::cthyb::MatrixSolver<std::complex<double> >(par));
+
+  // Call the ALPS CT-HYB solver
 
   //if (params.verbosity >= 2) std::cout << "Average sign: " << _average_sign << std::endl;
 
