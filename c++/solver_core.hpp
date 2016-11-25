@@ -38,6 +38,7 @@ class solver_core {
  int n_iw_;
  int n_tau_;
  int n_l_;
+ //int n_tau_hyb_;
  double beta;                                   // inverse temperature
  //atom_diag h_diag;                              // diagonalization of the local problem
  std::map<std::string, indices_type> gf_struct; // Block structure of the Green function FIXME
@@ -46,6 +47,7 @@ class solver_core {
  block_gf<imtime> _Delta_tau, _G_tau;           // Green's function containers: imaginary-time Green's functions
  block_gf<imtime, g_target_t> _G_tau_accum;     // Intermediate object to accumulate g(tau), either real or complex
  block_gf<legendre> _G_l;                       // Green's function containers: Legendre coefficients
+ boost::multi_array<double,3> delta_tau_Re_, delta_tau_Im_;
  histogram _pert_order_total;                   // Histogram of the total perturbation order
  histo_map_t _pert_order;                       // Histograms of the perturbation order for each block
  std::vector<matrix_t> _density_matrix;         // density matrix, when used in Norm mode
@@ -105,5 +107,16 @@ class solver_core {
  int solve_status() const { return _solve_status; }
 
 };
+
+template<typename Key, typename Value>
+Value map_at(const std::map<Key, Value>& data, const Key& key)
+{
+  typename std::map<Key, Value>::const_iterator it = data.find(key);
+  if(it != data.end()) {
+    return it->second;
+  } else {
+    return Value();
+  }
+}
 
 }

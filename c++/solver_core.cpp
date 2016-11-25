@@ -35,20 +35,59 @@ solver_core::solver_core(double beta_,
       g_tau_accum_blocks; //  Local real or complex (if complex mode) quantities for accumulation
 
   for (auto const &bl : gf_struct) {
+    std::cout << "block_name " << bl.first << std::endl;
     block_names.push_back(bl.first);
+    std::cout << "block_name " << bl.first << std::endl;
     int n = bl.second.size();
+    std::cout << "block_name " << bl.first << std::endl;
     num_flavors += bl.second.size();
 
+    std::cout << "A " << bl.first << std::endl;
     index_visitor iv;
+    std::cout << "B " << bl.first << std::endl;
     for (auto &ind: bl.second) { apply_visitor(iv, ind); }
+    std::cout << "C " << bl.first << std::endl;
     std::vector<std::vector<std::string>> indices{{iv.indices, iv.indices}};
+    std::cout << "D " << bl.first << std::endl;
 
     g0_iw_blocks.push_back(gf<imfreq>{{beta, Fermion, n_iw}, {n, n}, indices});
     g_tau_blocks.push_back(gf<imtime>{{beta, Fermion, n_tau}, {n, n}, indices});
-    g_l_blocks.push_back(gf<legendre>{{beta, Fermion, static_cast<size_t>(n_l)}, {n, n},
-                                      indices}); // FIXME: cast is ugly
+    g_l_blocks.push_back(gf<legendre>{{beta, Fermion, static_cast<size_t>(n_l)}, {n, n}, indices});
     delta_tau_blocks.push_back(gf<imtime>{{beta, Fermion, n_tau}, {n, n}, indices});
     g_tau_accum_blocks.push_back(gf<imtime, delta_target_t>{{beta, Fermion, n_tau}, {n, n}});
+    std::cout << "E " << bl.first << std::endl;
+  }
+
+  auto tmp = delta_tau_blocks[0].indices()[0];
+  auto tmp2 = delta_tau_blocks[0].indices().ind_vec;
+  for (auto it = tmp2.begin(); it != tmp2.end(); ++it) {
+    int i = 0;
+    for (auto it2 = it->begin(); it2 != it->end(); ++it2) {
+      std::cout << "debug3   " << i << " " << *it2 << std::endl;
+      ++ i;
+    }
+  }
+
+
+  //n_tau_hyb_ = delta_tau_blocks[0].data().shape(0);
+  //delta_tau_Re_.resize(boost::extents[n_tau_hyb_][num_flavors][num_flavors]);
+  //delta_tau_Im_.resize(boost::extents[n_tau_hyb_][num_flavors][num_flavors]);
+  //for (auto delta_bl = delta_tau_blocks.cbegin(); delta_bl != delta_tau_blocks.cend(); ++ delta_bl) {
+  //}
+
+  auto tmp3 = delta_tau_blocks[0];
+  std::cout << "rank " << tmp3.data().num_elements() << std::endl;
+  std::cout << "shape " << tmp3.data().shape(0) << std::endl;
+  std::cout << "shape " << tmp3.data().shape(1) << std::endl;
+  std::cout << "shape " << tmp3.data().shape(2) << std::endl;
+  std::cout << "data " << tmp3.data()(0,0,0) << std::endl;
+
+  //std::cout << "indices " << delta_tau_blocks[0].indices()[0] << std::endl;
+
+  int idx = 0;
+  for (auto it = tmp.cbegin(); it != tmp.cend(); ++it) {
+    std::cout << "debug2   " << idx << " " << *it << std::endl;
+    ++ idx;
   }
 
   _G0_iw = make_block_gf(block_names, g0_iw_blocks);
@@ -74,12 +113,9 @@ void solver_core::solve(solve_parameters_t const &params) {
   fundamental_operator_set fops;
   for (auto const &bl: gf_struct) {
     for (auto const &a: bl.second) {
-      std::cout << "debug : " << bl.first << " : " << bl.second << " : " << a << std::endl;
       fops.insert(bl.first, a);
     }
   }
-
-  std::cout << "num_flavors " << num_flavors << std::endl;
 
   // setup the linear index map
   std::map<std::pair<int, int>, int> linindex;
@@ -109,8 +145,10 @@ void solver_core::solve(solve_parameters_t const &params) {
 
   //Compute Coulomb tensor
   std::cout << "h_loc " << params.h_int << std::endl;
-  boost::multi_array<std::complex<double>, 4> Uijkl(boost::extents[num_flavors][num_flavors][num_flavors][num_flavors]);
-  std::fill(Uijkl.origin(), Uijkl.origin() + Uijkl.num_elements(), 0.0);
+  boost::multi_array<double, 4> Uijkl_Re(boost::extents[num_flavors][num_flavors][num_flavors][num_flavors]);
+  boost::multi_array<double, 4> Uijkl_Im(boost::extents[num_flavors][num_flavors][num_flavors][num_flavors]);
+  std::fill(Uijkl_Re.origin(), Uijkl_Re.origin() + Uijkl_Re.num_elements(), 0.0);
+  std::fill(Uijkl_Im.origin(), Uijkl_Im.origin() + Uijkl_Im.num_elements(), 0.0);
   for (auto it = _h_loc.cbegin(); it != _h_loc.cend(); ++it) {
     if (it->coef == 0.0) {
       continue;
@@ -134,12 +172,13 @@ void solver_core::solve(solve_parameters_t const &params) {
       indices[iop] = linindex2[std::make_pair(it_op->indices[0], it_op->indices[1])];
       ++ iop;
     }
-    Uijkl[indices[0]][indices[1]][indices[2]][indices[3]] = it->coef;
+    Uijkl_Re[indices[0]][indices[1]][indices[2]][indices[3]] = (it->coef).real();
+    Uijkl_Im[indices[0]][indices[1]][indices[2]][indices[3]] = (it->coef).imag();
   }
-  {
-    std::vector<std::complex<double> > Uijkl_vec(Uijkl.num_elements());
-    std::copy(Uijkl.origin(), Uijkl.origin() + Uijkl.num_elements(), Uijkl_vec.begin());
-  }
+  //{
+    //std::vector<std::complex<double> > Uijkl_vec(Uijkl.num_elements());
+    //std::copy(Uijkl.origin(), Uijkl.origin() + Uijkl.num_elements(), Uijkl_vec.begin());
+  //}
 
   // Do I have imaginary components in my local Hamiltonian?
   auto max_imag = 0.0;
@@ -148,7 +187,7 @@ void solver_core::solve(solve_parameters_t const &params) {
   }
 
   // Add quadratic terms to h_loc
-  std::vector<h_scalar_t> h_loc_vec(num_flavors * num_flavors);
+  std::vector<double> h_loc_vec_Re(num_flavors * num_flavors), h_loc_vec_Im(num_flavors * num_flavors);
   int b = 0;
   int offset = 0;
   for (auto const &bl: gf_struct) {
@@ -164,8 +203,12 @@ void solver_core::solve(solve_parameters_t const &params) {
           e_ij = _G0_iw[b].singularity()(2)(n1, n2).real();
         }
         _h_loc = _h_loc + e_ij * c_dag<h_scalar_t>(bl.first, a1) * c<h_scalar_t>(bl.first, a2);
-        //h_loc_vec[(n1 + offset) * num_flavors + (n2 + offset)] = ;
         std::cout << linindex[std::make_pair(b, n1)] << "  "  << linindex[std::make_pair(b,n2)] << " " << e_ij << std::endl;
+        const int flavor1 = linindex[std::make_pair(b, n1)];//CORRECT???? FIX ME!
+        const int flavor2 = linindex[std::make_pair(b, n2)];
+        h_loc_vec_Re[flavor1*num_flavors + flavor2] = e_ij.real();
+        h_loc_vec_Im[flavor1*num_flavors + flavor2] = e_ij.imag();
+
         n2++;
       }
       n1++;
@@ -175,19 +218,35 @@ void solver_core::solve(solve_parameters_t const &params) {
   }
 
   // Determine terms Delta_iw from G0_iw and ensure that the 1/iw behaviour of G0_iw is correct
-  b = 0;
-  range _;
-  triqs::clef::placeholder<0> iw_;
-  for (auto const &bl : gf_struct) {
-    Delta_iw[b](iw_) << G0_iw_inv[b].singularity()(-1) * iw_ + G0_iw_inv[b].singularity()(0);
-    Delta_iw[b] = Delta_iw[b] - G0_iw_inv[b];
-    _Delta_tau[b]() = inverse_fourier(Delta_iw[b]);
-    // Force all diagonal elements to be real
-    for (int i : range(bl.second.size())) _Delta_tau[b].data()(_, i, i) = real(_Delta_tau[b].data()(_, i, i));
-    // If off-diagonal elements are below threshold, set to real
-    if (max_element(abs(imag(_Delta_tau[b].data()))) < params.imag_threshold)
-      _Delta_tau[b].data() = real(_Delta_tau[b].data());
-    b++;
+  {
+    b = 0;
+    range _;
+    triqs::clef::placeholder<0> iw_;
+    int offset = 0;
+    delta_tau_Re_.resize(boost::extents[n_tau_][num_flavors][num_flavors]);
+    delta_tau_Im_.resize(boost::extents[n_tau_][num_flavors][num_flavors]);
+    for (auto const &bl : gf_struct) {
+      Delta_iw[b](iw_) << G0_iw_inv[b].singularity()(-1) * iw_ + G0_iw_inv[b].singularity()(0);
+      Delta_iw[b] = Delta_iw[b] - G0_iw_inv[b];
+      _Delta_tau[b]() = inverse_fourier(Delta_iw[b]);
+      // Force all diagonal elements to be real
+      for (int i : range(bl.second.size())) _Delta_tau[b].data()(_, i, i) = real(_Delta_tau[b].data()(_, i, i));
+      // If off-diagonal elements are below threshold, set to real
+      if (max_element(abs(imag(_Delta_tau[b].data()))) < params.imag_threshold) {
+        _Delta_tau[b].data() = real(_Delta_tau[b].data());
+      }
+      const auto num_flavors_block = bl.second.size();
+      for (auto itau = 0; itau < n_tau_; ++itau) {
+        for (auto f1 = 0; f1 < num_flavors_block; ++f1) {
+          for (auto f2 = 0; f2 < num_flavors_block; ++f2) {
+            delta_tau_Re_[itau][f1+offset][f2+offset] = _Delta_tau[b].data()(itau,f1,f2).real();
+            delta_tau_Im_[itau][f1+offset][f2+offset] = _Delta_tau[b].data()(itau,f1,f2).imag();
+          }
+        }
+      }
+      b++;
+      offset += num_flavors_block;
+    }
   }
 
   // Determine which solver to be used the real-number solver or the complex-number solver
@@ -197,30 +256,42 @@ void solver_core::solve(solve_parameters_t const &params) {
   //if (par.help_requested(std::cout)) { exit(0); } //If help message is requested, print it and exit normally.
 
   // Set parameters for ALPS CT-HYB solver
-  par["timelimit"] = params.max_time > 0 ? params.max_time : 1E+30;
+  par["timelimit"] = static_cast<unsigned long>(
+      (params.max_time > 0 && params.max_time < ULONG_MAX)
+      ? params.max_time : ULONG_MAX
+  );
   par["verbose"] = params.verbosity == 0 ? 0 : 1;
+  par["SEED"] = params.random_seed;
 
   par["model.sites"] = num_flavors;
   par["model.spins"] = 1;
   par["model.beta"] = beta;
-  par["model.n_tau_hyb"] = n_tau_;
-  par["model.coulomb_tensor"] = 0;
-  par["model.hopping_matrix"] = 0;
-  par["model.delta"] = 0;
+  par["model.command_line_mode"] = true;
+  par["model.coulomb_tensor_Re"] = std::vector<double>(Uijkl_Re.origin(), Uijkl_Re.origin() + Uijkl_Re.num_elements());
+  par["model.coulomb_tensor_Im"] = std::vector<double>(Uijkl_Im.origin(), Uijkl_Im.origin() + Uijkl_Im.num_elements());
+  par["model.hopping_matrix_Re"] = h_loc_vec_Re;
+  par["model.hopping_matrix_Im"] = h_loc_vec_Im;
+  par["model.n_tau_hyb"] = n_tau_ - 1;
+  par["model.delta_Re"] = std::vector<double>(delta_tau_Re_.origin(), delta_tau_Re_.origin()+delta_tau_Re_.num_elements());
+  par["model.delta_Im"] = std::vector<double>(delta_tau_Im_.origin(), delta_tau_Im_.origin()+delta_tau_Im_.num_elements());
 
   par["measurement.G1.n_legendre"] = n_l_;
-  par["measurement.G1.n_tau"] = n_tau_;
-  par["measurement.G1.n_iw"] = n_iw_;
+  par["measurement.G1.n_tau"] = n_tau_ - 1;//Note: the minus 1
+  par["measurement.G1.n_matsubara"] = n_iw_;
 
-  //int n_iw,
-  //int n_tau,
-  //int n_l) :
-
-  p_solver.reset(new alps::cthyb::MatrixSolver<std::complex<double> >(par));
+  if (params.verbosity >= 1) {
+    std::cout << "Parameters passed to ALPS CT-HYB solver are the following." << std::endl;
+    std::cout << par << std::endl;
+  }
 
   // Call the ALPS CT-HYB solver
+  p_solver.reset(new alps::cthyb::MatrixSolver<std::complex<double> >(par));
+  p_solver->solve();
+  //auto alps_results = t(p_solver->get_results(), "Sign")) << std::endl;
 
-  //if (params.verbosity >= 2) std::cout << "Average sign: " << _average_sign << std::endl;
+  if (params.verbosity >= 2) {
+    std::cout << "Average sign: " << boost::any_cast<double>(p_solver->get_results().at("Sign")) << std::endl;
+  }
 
   // Copy local (real or complex) G_tau back to complex G_tau
   //if (params.measure_g_tau) _G_tau = _G_tau_accum;
