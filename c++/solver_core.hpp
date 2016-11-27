@@ -108,14 +108,31 @@ class solver_core {
 
 };
 
-template<typename Key, typename Value>
-Value map_at(const std::map<Key, Value>& data, const Key& key)
-{
-  typename std::map<Key, Value>::const_iterator it = data.find(key);
-  if(it != data.end()) {
-    return it->second;
-  } else {
-    return Value();
+namespace detail {
+  template<typename GA, typename GT>
+  void copy_from_alps_to_triqs_gf(const GA &ga, GT &gt) {
+    const auto num_blocks = gt.data().size();
+    const auto n_tau = gt.data()[0].data().shape()[0];
+
+    //Count the number of flavors
+    int num_flavors = 0;
+    for (int b : range(num_blocks)) {
+      num_flavors += gt.data()[b].data().shape()[1];
+    }
+
+    int offset = 0;
+    for (int b : range(num_blocks)) {
+      const auto num_flavors_block = gt.data()[b].data().shape()[1];
+      for (auto itau = 0; itau < n_tau; ++itau) {
+        for (auto f1 = 0; f1 < num_flavors_block; ++f1) {
+          for (auto f2 = 0; f2 < num_flavors_block; ++f2) {
+            gt.data()[b].data()(itau,f1,f2) =
+                ga(alps::gf::itime_index(itau), alps::gf::index(f1+offset), alps::gf::index(f2+offset));
+          }
+        }
+      }
+      offset += num_flavors_block;
+    }
   }
 }
 

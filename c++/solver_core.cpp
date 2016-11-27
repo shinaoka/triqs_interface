@@ -96,6 +96,13 @@ solver_core::solver_core(double beta_,
   _Delta_tau = make_block_gf(block_names, delta_tau_blocks);
   _G_tau_accum = make_block_gf(block_names, g_tau_accum_blocks);
 
+  //std::cout << "block Gf _rank " << typeid(_G_tau.data()).name() << std::endl;
+  //std::cout << "block Gf _rank " << _G_tau.data().data()->data().num_elements() << std::endl;
+  //std::cout << "block Gf _rank " << _G_tau.data().data()->mesh().size() << std::endl;
+  std::cout << "block Gf _rank " << _G_tau.data().size() << std::endl;
+  std::cout << "block Gf _rank " << _G_tau.data()[0].data().rank << std::endl;
+  std::cout << "block Gf _rank " << _G_tau.data()[0].data().shape() << std::endl;
+  std::cout << "block Gf _rank " << _G_tau.data()[0].data()(0,0,0) << std::endl;
 }
 
 /// -------------------------------------------------------------------------------------------
@@ -287,14 +294,20 @@ void solver_core::solve(solve_parameters_t const &params) {
   // Call the ALPS CT-HYB solver
   p_solver.reset(new alps::cthyb::MatrixSolver<std::complex<double> >(par));
   p_solver->solve();
-  //auto alps_results = t(p_solver->get_results(), "Sign")) << std::endl;
+  const auto &alps_results = p_solver->get_results();
 
   if (params.verbosity >= 2) {
-    std::cout << "Average sign: " << boost::any_cast<double>(p_solver->get_results().at("Sign")) << std::endl;
+    std::cout << "Average sign: " << boost::any_cast<double>(alps_results.at("Sign")) << std::endl;
   }
 
   // Copy local (real or complex) G_tau back to complex G_tau
-  //if (params.measure_g_tau) _G_tau = _G_tau_accum;
+  using alps_gtau_t = alps::cthyb::MatrixSolver<std::complex<double> >::G1_tau_t;
+  detail::copy_from_alps_to_triqs_gf(
+      boost::any_cast<const alps_gtau_t&>(alps_results.at("gf")),
+      _G_tau
+  );
+
+  //_G_tau = _G_tau_accum;
 }
 
 }
