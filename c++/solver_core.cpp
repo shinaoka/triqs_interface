@@ -103,6 +103,7 @@ solver_core::solver_core(double beta_,
   std::cout << "block Gf _rank " << _G_tau.data()[0].data().rank << std::endl;
   std::cout << "block Gf _rank " << _G_tau.data()[0].data().shape() << std::endl;
   std::cout << "block Gf _rank " << _G_tau.data()[0].data()(0,0,0) << std::endl;
+  std::cout << "block Gf singularity " << _G_tau.data()[0].singularity() << std::endl;
 }
 
 /// -------------------------------------------------------------------------------------------
@@ -151,12 +152,13 @@ void solver_core::solve(solve_parameters_t const &params) {
   auto Delta_iw = G0_iw_inv;
 
   //Compute Coulomb tensor
-  std::cout << "h_loc " << params.h_int << std::endl;
+  //std::cout << "h_loc " << params.h_int << std::endl;
   boost::multi_array<double, 4> Uijkl_Re(boost::extents[num_flavors][num_flavors][num_flavors][num_flavors]);
   boost::multi_array<double, 4> Uijkl_Im(boost::extents[num_flavors][num_flavors][num_flavors][num_flavors]);
   std::fill(Uijkl_Re.origin(), Uijkl_Re.origin() + Uijkl_Re.num_elements(), 0.0);
   std::fill(Uijkl_Im.origin(), Uijkl_Im.origin() + Uijkl_Im.num_elements(), 0.0);
-  for (auto it = _h_loc.cbegin(); it != _h_loc.cend(); ++it) {
+  for (auto it = params.h_int.cbegin(); it != params.h_int.cend(); ++it) {
+    std::cout << "params.h_int " << it->coef << std::endl;
     if (it->coef == 0.0) {
       continue;
     }
@@ -179,13 +181,16 @@ void solver_core::solve(solve_parameters_t const &params) {
       indices[iop] = linindex2[std::make_pair(it_op->indices[0], it_op->indices[1])];
       ++ iop;
     }
-    Uijkl_Re[indices[0]][indices[1]][indices[2]][indices[3]] = (it->coef).real();
-    Uijkl_Im[indices[0]][indices[1]][indices[2]][indices[3]] = (it->coef).imag();
+    Uijkl_Re[indices[0]][indices[1]][indices[2]][indices[3]] += 2*(it->coef).real();
+    Uijkl_Im[indices[0]][indices[1]][indices[2]][indices[3]] += 2*(it->coef).imag();
+    std::cout << "Uijkl_Re " << it->coef << std::endl;
   }
   //{
     //std::vector<std::complex<double> > Uijkl_vec(Uijkl.num_elements());
     //std::copy(Uijkl.origin(), Uijkl.origin() + Uijkl.num_elements(), Uijkl_vec.begin());
   //}
+  //std::cout << "Uijkl_Re " << Uijkl_Re << std::endl;
+  //std::cout << "Uijkl_Im " << Uijkl_Im << std::endl;
 
   // Do I have imaginary components in my local Hamiltonian?
   auto max_imag = 0.0;
@@ -197,6 +202,7 @@ void solver_core::solve(solve_parameters_t const &params) {
   std::vector<double> h_loc_vec_Re(num_flavors * num_flavors), h_loc_vec_Im(num_flavors * num_flavors);
   int b = 0;
   int offset = 0;
+  _h_loc = params.h_int;
   for (auto const &bl: gf_struct) {
 
     int n1 = 0;
@@ -223,6 +229,7 @@ void solver_core::solve(solve_parameters_t const &params) {
     b++;
     offset += bl.second.size();
   }
+  std::cout << "h_loc " << _h_loc << std::endl;
 
   // Determine terms Delta_iw from G0_iw and ensure that the 1/iw behaviour of G0_iw is correct
   {
@@ -303,7 +310,7 @@ void solver_core::solve(solve_parameters_t const &params) {
   // Copy local (real or complex) G_tau back to complex G_tau
   using alps_gtau_t = alps::cthyb::MatrixSolver<std::complex<double> >::G1_tau_t;
   detail::copy_from_alps_to_triqs_gf(
-      boost::any_cast<const alps_gtau_t&>(alps_results.at("gf")),
+      boost::any_cast<const alps_gtau_t&>(alps_results.at("gtau")),
       _G_tau
   );
 

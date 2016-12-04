@@ -65,6 +65,7 @@ class Solver(SolverCore):
 
         perform_post_proc = params_kw.pop("perform_post_proc", True)
         perform_tail_fit = params_kw.pop("perform_tail_fit", False)
+        print "DEBUG  perform_post_proc =",  perform_post_proc
         if perform_post_proc and perform_tail_fit:
             # If tail parameters provided for Sigma_iw fitting, use them, otherwise use defaults
             if not (("fit_min_n" in params_kw) or ("fit_max_n" in params_kw)):
@@ -98,6 +99,7 @@ class Solver(SolverCore):
         # (only supported for G_tau, to permit compatibility with dft_tools)
         if perform_post_proc:
             # Fourier transform G_tau to obtain G_iw
+            print ("Doing post_proc")
             for name, g in self.G_tau: self.G_iw[name] << Fourier(g)
             # Solve Dyson's eq to obtain Sigma_iw and G_iw and fit the tail
             self.Sigma_iw = dyson(G0_iw=self.G0_iw,G_iw=self.G_iw)

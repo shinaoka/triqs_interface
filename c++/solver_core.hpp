@@ -132,6 +132,7 @@ namespace detail {
         }
       }
       offset += num_flavors_block;
+      gt[b].singularity()(1) = 1.0;
     }
   }
 }
