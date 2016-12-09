@@ -65,7 +65,6 @@ class Solver(SolverCore):
 
         perform_post_proc = params_kw.pop("perform_post_proc", True)
         perform_tail_fit = params_kw.pop("perform_tail_fit", False)
-        print "DEBUG  perform_post_proc =",  perform_post_proc
         if perform_post_proc and perform_tail_fit:
             # If tail parameters provided for Sigma_iw fitting, use them, otherwise use defaults
             if not (("fit_min_n" in params_kw) or ("fit_max_n" in params_kw)):
@@ -86,7 +85,7 @@ class Solver(SolverCore):
         for name, indices in self.gf_struct.items():
             dim = len(indices)
             if ( (self.G0_iw[name].tail[1]-np.eye(dim)) > 10**(-6) ).any(): print_warning = True
-	if print_warning and mpi.is_master_node():
+        if print_warning and mpi.is_master_node():
             warning = ("!--------------------------------------------------------------------------------------!\n"
                        "! WARNING: Some components of your G0_iw do not decay as 1/iw. Continuing nonetheless. !\n"
                        "!--------------------------------------------------------------------------------------!")

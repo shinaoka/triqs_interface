@@ -276,9 +276,15 @@ void solver_core::solve(solve_parameters_t const &params) {
   );
   par["verbose"] = params.verbosity == 0 ? 0 : 1;
   par["SEED"] = params.random_seed;
+  std::cout << "random seed " << par["SEED"] << std::endl;
 
-  par["model.sites"] = num_flavors;
-  par["model.spins"] = 1;
+  if (num_flavors % 2 == 0) {
+    par["model.sites"] = num_flavors/2;
+    par["model.spins"] = 2;
+  } else {
+    par["model.sites"] = num_flavors;
+    par["model.spins"] = 1;
+  }
   par["model.beta"] = beta;
   par["model.command_line_mode"] = true;
   par["model.coulomb_tensor_Re"] = std::vector<double>(Uijkl_Re.origin(), Uijkl_Re.origin() + Uijkl_Re.num_elements());
@@ -301,20 +307,24 @@ void solver_core::solve(solve_parameters_t const &params) {
   // Call the ALPS CT-HYB solver
   p_solver.reset(new alps::cthyb::MatrixSolver<std::complex<double> >(par));
   p_solver->solve();
-  const auto &alps_results = p_solver->get_results();
 
-  if (params.verbosity >= 2) {
-    std::cout << "Average sign: " << boost::any_cast<double>(alps_results.at("Sign")) << std::endl;
+  if (alps::mpi::communicator().rank() == 0) {
+    // Process results
+    const auto &alps_results = p_solver->get_results();
+    if (params.verbosity >= 2) {
+      std::cout << "Average sign: " << boost::any_cast<double>(alps_results.at("Sign")) << std::endl;
+    }
+
+    // Copy local (real or complex) G_tau back to complex G_tau
+    using alps_gtau_t = alps::cthyb::MatrixSolver<std::complex<double> >::G1_tau_t;
+    detail::copy_from_alps_to_triqs_gf(
+        boost::any_cast<const alps_gtau_t&>(alps_results.at("gtau")),
+        _G_tau
+    );
   }
 
-  // Copy local (real or complex) G_tau back to complex G_tau
-  using alps_gtau_t = alps::cthyb::MatrixSolver<std::complex<double> >::G1_tau_t;
-  detail::copy_from_alps_to_triqs_gf(
-      boost::any_cast<const alps_gtau_t&>(alps_results.at("gtau")),
-      _G_tau
-  );
+  detail::mpi_broadcast(_G_tau);
 
-  //_G_tau = _G_tau_accum;
 }
 
 }

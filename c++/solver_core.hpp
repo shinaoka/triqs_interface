@@ -135,6 +135,15 @@ namespace detail {
       gt[b].singularity()(1) = 1.0;
     }
   }
+
+  template <typename... T>
+  void mpi_broadcast(block_gf<T...> &g, triqs::mpi::communicator c = {}, int root = 0) {
+    const auto num_blocks = g.data().size();
+    for (int b : range(num_blocks)) {
+      triqs::arrays::mpi_broadcast(g[b].data(), c, root);
+      triqs::arrays::mpi_broadcast(g[b].singularity().data(), c, root);
+    }
+  }
 }
 
 }

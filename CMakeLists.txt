@@ -4,7 +4,9 @@ list(APPEND CMAKE_MODULE_PATH ${TRIQS_PATH}/share/triqs/cmake)
 # start configuration
 cmake_minimum_required(VERSION 2.8)
 project(alps_cthyb CXX)
-set(CMAKE_BUILD_TYPE Release)
+if (CMAKE_BUILD_TYPE STREQUAL "")
+  set(CMAKE_BUILD_TYPE Release)
+endif()
 enable_testing()
 
 # Load TRIQS, including all predefined variables from TRIQS installation
@@ -20,8 +22,20 @@ find_package(ALPSCoreCTHYB REQUIRED)
 set(CMAKE_INSTALL_PREFIX ${TRIQS_PATH})
 
 # Add the compiling options (-D... ) for C++
+#message(STATUS ${CMAKE_CXX_FLAGS})
+#message(STATUS ${CMAKE_CXX_FLAGS_RELEASE})
+#message(STATUS ${TRIQS_CXX_DEFINITIONS})
+#message(STATUS ${CMAKE_BUILD_TYPE})
 message(STATUS "TRIQS : Adding compilation flags detected by the library (C++11/14, libc++, etc...) ")
-add_definitions(${TRIQS_CXX_DEFINITIONS})
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+  add_definitions(${TRIQS_CXX_DEFINITIONS} ${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_CXX_FLAGS} -DBOOST_DISABLE_ASSERTS)
+elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  add_definitions(${TRIQS_CXX_DEFINITIONS} ${CMAKE_CXX_FLAGS_DEBUG} ${CMAKE_CXX_FLAGS})
+elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+  add_definitions(${TRIQS_CXX_DEFINITIONS} ${CMAKE_CXX_FLAGS_RELWITHDEBINFO} ${CMAKE_CXX_FLAGS})
+elseif(CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
+  add_definitions(${TRIQS_CXX_DEFINITIONS} ${CMAKE_CXX_FLAGS_MINSIZEREL} ${CMAKE_CXX_FLAGS})
+endif()
 
 # Options for the compilation ...
 #target_link_libraries(alps_cthyb ${ALPSCore_LIBRARIES} ${ALPSCoreCTHYB_LIBRARIES})
