@@ -35,27 +35,19 @@ solver_core::solver_core(double beta_,
       g_tau_accum_blocks; //  Local real or complex (if complex mode) quantities for accumulation
 
   for (auto const &bl : gf_struct) {
-    std::cout << "block_name " << bl.first << std::endl;
     block_names.push_back(bl.first);
-    std::cout << "block_name " << bl.first << std::endl;
     int n = bl.second.size();
-    std::cout << "block_name " << bl.first << std::endl;
     num_flavors += bl.second.size();
 
-    std::cout << "A " << bl.first << std::endl;
     index_visitor iv;
-    std::cout << "B " << bl.first << std::endl;
     for (auto &ind: bl.second) { apply_visitor(iv, ind); }
-    std::cout << "C " << bl.first << std::endl;
     std::vector<std::vector<std::string>> indices{{iv.indices, iv.indices}};
-    std::cout << "D " << bl.first << std::endl;
 
     g0_iw_blocks.push_back(gf<imfreq>{{beta, Fermion, n_iw}, {n, n}, indices});
     g_tau_blocks.push_back(gf<imtime>{{beta, Fermion, n_tau}, {n, n}, indices});
     g_l_blocks.push_back(gf<legendre>{{beta, Fermion, static_cast<size_t>(n_l)}, {n, n}, indices});
     delta_tau_blocks.push_back(gf<imtime>{{beta, Fermion, n_tau}, {n, n}, indices});
     g_tau_accum_blocks.push_back(gf<imtime, delta_target_t>{{beta, Fermion, n_tau}, {n, n}});
-    std::cout << "E " << bl.first << std::endl;
   }
 
   auto tmp = delta_tau_blocks[0].indices()[0];
@@ -63,31 +55,8 @@ solver_core::solver_core(double beta_,
   for (auto it = tmp2.begin(); it != tmp2.end(); ++it) {
     int i = 0;
     for (auto it2 = it->begin(); it2 != it->end(); ++it2) {
-      std::cout << "debug3   " << i << " " << *it2 << std::endl;
       ++ i;
     }
-  }
-
-
-  //n_tau_hyb_ = delta_tau_blocks[0].data().shape(0);
-  //delta_tau_Re_.resize(boost::extents[n_tau_hyb_][num_flavors][num_flavors]);
-  //delta_tau_Im_.resize(boost::extents[n_tau_hyb_][num_flavors][num_flavors]);
-  //for (auto delta_bl = delta_tau_blocks.cbegin(); delta_bl != delta_tau_blocks.cend(); ++ delta_bl) {
-  //}
-
-  auto tmp3 = delta_tau_blocks[0];
-  std::cout << "rank " << tmp3.data().num_elements() << std::endl;
-  std::cout << "shape " << tmp3.data().shape(0) << std::endl;
-  std::cout << "shape " << tmp3.data().shape(1) << std::endl;
-  std::cout << "shape " << tmp3.data().shape(2) << std::endl;
-  std::cout << "data " << tmp3.data()(0,0,0) << std::endl;
-
-  //std::cout << "indices " << delta_tau_blocks[0].indices()[0] << std::endl;
-
-  int idx = 0;
-  for (auto it = tmp.cbegin(); it != tmp.cend(); ++it) {
-    std::cout << "debug2   " << idx << " " << *it << std::endl;
-    ++ idx;
   }
 
   _G0_iw = make_block_gf(block_names, g0_iw_blocks);
@@ -95,15 +64,6 @@ solver_core::solver_core(double beta_,
   _G_l = make_block_gf(block_names, g_l_blocks);
   _Delta_tau = make_block_gf(block_names, delta_tau_blocks);
   _G_tau_accum = make_block_gf(block_names, g_tau_accum_blocks);
-
-  //std::cout << "block Gf _rank " << typeid(_G_tau.data()).name() << std::endl;
-  //std::cout << "block Gf _rank " << _G_tau.data().data()->data().num_elements() << std::endl;
-  //std::cout << "block Gf _rank " << _G_tau.data().data()->mesh().size() << std::endl;
-  std::cout << "block Gf _rank " << _G_tau.data().size() << std::endl;
-  std::cout << "block Gf _rank " << _G_tau.data()[0].data().rank << std::endl;
-  std::cout << "block Gf _rank " << _G_tau.data()[0].data().shape() << std::endl;
-  std::cout << "block Gf _rank " << _G_tau.data()[0].data()(0,0,0) << std::endl;
-  std::cout << "block Gf singularity " << _G_tau.data()[0].singularity() << std::endl;
 }
 
 /// -------------------------------------------------------------------------------------------
@@ -152,13 +112,11 @@ void solver_core::solve(solve_parameters_t const &params) {
   auto Delta_iw = G0_iw_inv;
 
   //Compute Coulomb tensor
-  //std::cout << "h_loc " << params.h_int << std::endl;
   boost::multi_array<double, 4> Uijkl_Re(boost::extents[num_flavors][num_flavors][num_flavors][num_flavors]);
   boost::multi_array<double, 4> Uijkl_Im(boost::extents[num_flavors][num_flavors][num_flavors][num_flavors]);
   std::fill(Uijkl_Re.origin(), Uijkl_Re.origin() + Uijkl_Re.num_elements(), 0.0);
   std::fill(Uijkl_Im.origin(), Uijkl_Im.origin() + Uijkl_Im.num_elements(), 0.0);
   for (auto it = params.h_int.cbegin(); it != params.h_int.cend(); ++it) {
-    std::cout << "params.h_int " << it->coef << std::endl;
     if (it->coef == 0.0) {
       continue;
     }
@@ -183,14 +141,7 @@ void solver_core::solve(solve_parameters_t const &params) {
     }
     Uijkl_Re[indices[0]][indices[1]][indices[2]][indices[3]] += 2*(it->coef).real();
     Uijkl_Im[indices[0]][indices[1]][indices[2]][indices[3]] += 2*(it->coef).imag();
-    std::cout << "Uijkl_Re " << it->coef << std::endl;
   }
-  //{
-    //std::vector<std::complex<double> > Uijkl_vec(Uijkl.num_elements());
-    //std::copy(Uijkl.origin(), Uijkl.origin() + Uijkl.num_elements(), Uijkl_vec.begin());
-  //}
-  //std::cout << "Uijkl_Re " << Uijkl_Re << std::endl;
-  //std::cout << "Uijkl_Im " << Uijkl_Im << std::endl;
 
   // Do I have imaginary components in my local Hamiltonian?
   auto max_imag = 0.0;
@@ -216,7 +167,6 @@ void solver_core::solve(solve_parameters_t const &params) {
           e_ij = _G0_iw[b].singularity()(2)(n1, n2).real();
         }
         _h_loc = _h_loc + e_ij * c_dag<h_scalar_t>(bl.first, a1) * c<h_scalar_t>(bl.first, a2);
-        std::cout << linindex[std::make_pair(b, n1)] << "  "  << linindex[std::make_pair(b,n2)] << " " << e_ij << std::endl;
         const int flavor1 = linindex[std::make_pair(b, n1)];//CORRECT???? FIX ME!
         const int flavor2 = linindex[std::make_pair(b, n2)];
         h_loc_vec_Re[flavor1*num_flavors + flavor2] = e_ij.real();
@@ -229,7 +179,6 @@ void solver_core::solve(solve_parameters_t const &params) {
     b++;
     offset += bl.second.size();
   }
-  std::cout << "h_loc " << _h_loc << std::endl;
 
   // Determine terms Delta_iw from G0_iw and ensure that the 1/iw behaviour of G0_iw is correct
   {
@@ -267,7 +216,6 @@ void solver_core::solve(solve_parameters_t const &params) {
   alps::params par;
   boost::shared_ptr<alps::cthyb::Solver> p_solver;
   alps::cthyb::MatrixSolver<std::complex<double> >::define_parameters(par);
-  //if (par.help_requested(std::cout)) { exit(0); } //If help message is requested, print it and exit normally.
 
   // Set parameters for ALPS CT-HYB solver
   par["timelimit"] = static_cast<unsigned long>(
@@ -276,7 +224,6 @@ void solver_core::solve(solve_parameters_t const &params) {
   );
   par["verbose"] = params.verbosity == 0 ? 0 : 1;
   par["SEED"] = params.random_seed;
-  std::cout << "random seed " << par["SEED"] << std::endl;
 
   if (num_flavors % 2 == 0) {
     par["model.sites"] = num_flavors/2;
@@ -298,11 +245,6 @@ void solver_core::solve(solve_parameters_t const &params) {
   par["measurement.G1.n_legendre"] = n_l_;
   par["measurement.G1.n_tau"] = n_tau_ - 1;//Note: the minus 1
   par["measurement.G1.n_matsubara"] = n_iw_;
-
-  if (params.verbosity >= 1) {
-    std::cout << "Parameters passed to ALPS CT-HYB solver are the following." << std::endl;
-    std::cout << par << std::endl;
-  }
 
   // Call the ALPS CT-HYB solver
   p_solver.reset(new alps::cthyb::MatrixSolver<std::complex<double> >(par));

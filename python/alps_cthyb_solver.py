@@ -98,7 +98,6 @@ class Solver(SolverCore):
         # (only supported for G_tau, to permit compatibility with dft_tools)
         if perform_post_proc:
             # Fourier transform G_tau to obtain G_iw
-            print ("Doing post_proc")
             for name, g in self.G_tau: self.G_iw[name] << Fourier(g)
             # Solve Dyson's eq to obtain Sigma_iw and G_iw and fit the tail
             self.Sigma_iw = dyson(G0_iw=self.G0_iw,G_iw=self.G_iw)
