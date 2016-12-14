@@ -50,7 +50,7 @@ After the measurement process,
 the imaginary-time and Matsubara-frequency data are computed from the Legendre basis data.
 If you set perform\_post\_proc = True, the self-energy will be computed in addition.
 
-An example for a single-site impurity model is available as aim_alps.py in the "samples" directory in the repository.
+An example Python script for a single-site impurity model is available [here](https://github.com/shinaoka/triqs_interface/blob/master/samples/aim_alps.py).
 
 ## License
 This application is licensed under GPLv3.
