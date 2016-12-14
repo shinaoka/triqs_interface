@@ -12,6 +12,7 @@
 #include <triqs/utility/callbacks.hpp>
 #include <triqs/operators/many_body_operator.hpp>
 #include <triqs/statistics/histograms.hpp>
+#include <triqs/gfs/functions/functions.hpp>
 
 #include <alps/params.hpp>
 
@@ -133,6 +134,36 @@ namespace detail {
       }
       offset += num_flavors_block;
       gt[b].singularity()(1) = 1.0;
+    }
+  }
+
+  template<typename GA, typename GT>
+  void copy_Gl(const GA &ga, GT &gt) {
+    const auto num_blocks = gt.data().size();
+    const auto n_tau = gt.data()[0].data().shape()[0];
+
+    //Count the number of flavors
+    int num_flavors = 0;
+    for (int b : range(num_blocks)) {
+      num_flavors += gt.data()[b].data().shape()[1];
+    }
+
+    int offset = 0;
+    for (int b : range(num_blocks)) {
+      const auto num_flavors_block = gt.data()[b].data().shape()[1];
+      for (auto il = 0; il < n_tau; ++il) {
+        for (auto f1 = 0; f1 < num_flavors_block; ++f1) {
+          for (auto f2 = 0; f2 < num_flavors_block; ++f2) {
+            gt.data()[b].data()(il,f1,f2) = ga[f1+offset][f2+offset][il];
+          }
+        }
+      }
+      offset += num_flavors_block;
+      //gt[b].singularity()(1) = 1.0;
+      triqs::arrays::matrix<double> id(get_target_shape(gt[b]));
+      id() = 1.0;
+      auto v = triqs::gfs::gf_view<triqs::gfs::legendre>(gt[b]);
+      triqs::gfs::enforce_discontinuity(v, id);
     }
   }
 

@@ -263,6 +263,11 @@ void solver_core::solve(solve_parameters_t const &params) {
         boost::any_cast<const alps_gtau_t&>(alps_results.at("gtau")),
         _G_tau
     );
+
+    detail::copy_Gl(
+        boost::any_cast<const boost::multi_array<std::complex<double>, 3>& >(alps_results.at("G1_LEGENDRE")),
+        _G_l
+    );
   }
 
   detail::mpi_broadcast(_G_tau);
