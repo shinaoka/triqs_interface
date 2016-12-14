@@ -56,5 +56,6 @@ An example for a single-site impurity model is available as aim_alps.py in the "
 This application is licensed under GPLv3.
 
 ## Acknowlegements
-We acknowlegement Emanuel Gull, Olivier Parcollet, Michel Ferrero and all other contributors to ALPS and TRIQS.
+We acknowlege Emanuel Gull, Olivier Parcollet, Michel Ferrero and all other contributors to ALPS and TRIQS.
+We also acknowledge Junya Otsuki for testing the code.
 We took some source code from TRIQS/cthyb.
