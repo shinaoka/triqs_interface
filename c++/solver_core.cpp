@@ -270,7 +270,17 @@ void solver_core::solve(solve_parameters_t const &params) {
     );
   }
 
-  detail::mpi_broadcast(_G_tau);
+  //detail::mpi_broadcast(_G_tau);
+  {
+    const int root = 0;
+    for (int b : range(_G_tau.data().size())) {
+      triqs::arrays::mpi_broadcast(_G_tau[b].data(), triqs::mpi::communicator{}, root);
+      triqs::arrays::mpi_broadcast(_G_tau[b].singularity().data(), triqs::mpi::communicator{}, root);
+      triqs::arrays::mpi_broadcast(_G_l[b].data(), triqs::mpi::communicator{}, root);
+    }
+  }
+//
+  //detail::mpi_broadcast(_G_l);
 
 }
 
