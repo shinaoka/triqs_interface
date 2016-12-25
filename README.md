@@ -52,6 +52,15 @@ If you set perform\_post\_proc = True, the self-energy will be computed in addit
 
 An example Python script for a single-site impurity model is available [here](https://github.com/shinaoka/triqs_interface/blob/master/samples/aim_alps.py).
 
+## Program parameters
+| Parameter Name | Type     | Default                   | Documentation  |
+|:-----------|------------:|:------------:|:------------:|
+| h_int          | Operator | --                        | Interacting part of the atomic Hamiltonian |
+| random_seed    | int      | 34788 + 928374 * MPI.rank | Seed for random number generator|
+| max_time       | int      | -1 = 10 % of total simulation time             | Maximum runtime in seconds, use -1 to use a default value (10 % of total simulation time) |
+| verbosity      | int      | 0                         | Verbosity |
+| imag_threshold | double   | 1.e-15                    | Threshold below which imaginary components of Delta and h_loc are set to zero  |
+
 ## License
 This application is licensed under GPLv3.
 
