@@ -5,6 +5,8 @@ This is a Python wapper of the efficient and general ALPSCore/CT-HYB solver for 
 Please follow the following steps.
 You must use the same C++ compiler and the same C++ standard (i.e., C++14) to build TRIQS, ALPSCore, ALPSCore/CT-HYB, and this wapper. We strongly recommend to use GCC or clang compilers because TRIQS uses very new features of C++. As of now, we did not successfully build TRIQS using Intel C++ compiler.
 
+Please use the latest versions of TRIQS, ALPSCore, ALPSCore/CT-HYB in the git repositories.
+
 ### TRIQS
 TRIQS and ALPSCore are independent sets of libraries. But, we strongly recommed you to install TRIQS first, because it requires the newer C++ standard. As of now (12/14/2016), TRIQS requires C++14.
 
