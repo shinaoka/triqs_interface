@@ -1,5 +1,5 @@
 # Generated automatically using the command :
-# c++2py.py ../c++/solver_core.hpp -p -mpytriqs.applications.impurity_solvers.alps_cthyb -o alps_cthyb --moduledoc "The ALPS cthyb solver" -I /opt/local/include/openmpi-clang38
+# c++2py.py ../c++/solver_core.hpp -p -mpytriqs.applications.impurity_solvers.alps_cthyb -o alps_cthyb --moduledoc "The ALPS cthyb solver" -I /opt/local/include/openmpi-clang38 -I /opt/ALPSCore/include
 from wrap_generator import *
 
 # The module
@@ -39,19 +39,21 @@ c.add_constructor("""(double beta, std::map<std::string,indices_type> gf_struct,
                   doc = """ """)
 
 c.add_method("""void solve (**alps_cthyb::solve_parameters_t)""",
-             doc = """+----------------+----------+---------------------------+--------------------------------------------------------------------------------+
-| Parameter Name | Type     | Default                   | Documentation                                                                  |
-+================+==========+===========================+================================================================================+
-| h_int          | Operator |                           | Interacting part of the atomic Hamiltonian                                     |
-+----------------+----------+---------------------------+--------------------------------------------------------------------------------+
-| random_seed    | int      | 34788 + 928374 * MPI.rank | Seed for random number generator                                               |
-+----------------+----------+---------------------------+--------------------------------------------------------------------------------+
-| max_time       | int      | -1 = infinite             | Maximum runtime in seconds, use -1 to set infinite                             |
-+----------------+----------+---------------------------+--------------------------------------------------------------------------------+
-| verbosity      | int      | 0                         |                                                                                |
-+----------------+----------+---------------------------+--------------------------------------------------------------------------------+
-| imag_threshold | double   | 1.e-15                    | Threshold below which imaginary components of Delta and h_loc are set to zero  |
-+----------------+----------+---------------------------+--------------------------------------------------------------------------------+ """)
+             doc = """+----------------+----------+------------------------------------+------------------------------------------------------------------------------------------------------------------------+
+| Parameter Name | Type     | Default                            | Documentation                                                                                                          |
++================+==========+====================================+========================================================================================================================+
+| assume_real    | bool     |                                    | If assume_real == true, the real-number solver will be used. Otherwise, the complex version will called.               |
++----------------+----------+------------------------------------+------------------------------------------------------------------------------------------------------------------------+
+| h_int          | Operator |                                    | Interacting part of the atomic Hamiltonian                                                                             |
++----------------+----------+------------------------------------+------------------------------------------------------------------------------------------------------------------------+
+| random_seed    | int      | 34788 + 928374 * MPI.rank          | Seed for random number generator                                                                                       |
++----------------+----------+------------------------------------+------------------------------------------------------------------------------------------------------------------------+
+| max_time       | int      | -1 = 10 % of total simulation time | Maximum runtime in seconds, Maximum runtime in seconds, use -1 to use a default value (10 % of total simulation time)  |
++----------------+----------+------------------------------------+------------------------------------------------------------------------------------------------------------------------+
+| verbosity      | int      | 0                                  |                                                                                                                        |
++----------------+----------+------------------------------------+------------------------------------------------------------------------------------------------------------------------+
+| imag_threshold | double   | 1.e-15                             | Threshold below which imaginary components of Delta and h_loc are set to zero                                          |
++----------------+----------+------------------------------------+------------------------------------------------------------------------------------------------------------------------+ """)
 
 c.add_property(name = "h_loc",
                getter = cfunction("many_body_op_t h_loc ()"),
