@@ -111,7 +111,7 @@ class solver_core {
 
 namespace detail {
   template<typename GA, typename GT>
-  void copy_from_alps_to_triqs_gf(const GA &ga, GT &gt) {
+  void copy_from_alps_to_triqs_gf(const GA &ga, GT &gt, bool assume_real=false) {
     const auto num_blocks = gt.data().size();
     const auto n_tau = gt.data()[0].data().shape()[0];
 
@@ -127,8 +127,13 @@ namespace detail {
       for (auto itau = 0; itau < n_tau; ++itau) {
         for (auto f1 = 0; f1 < num_flavors_block; ++f1) {
           for (auto f2 = 0; f2 < num_flavors_block; ++f2) {
-            gt.data()[b].data()(itau,f1,f2) =
-                ga(alps::gf::itime_index(itau), alps::gf::index(f1+offset), alps::gf::index(f2+offset));
+            if (assume_real) {
+              gt.data()[b].data()(itau,f1,f2) =
+                  ga(alps::gf::itime_index(itau), alps::gf::index(f1+offset), alps::gf::index(f2+offset)).real();
+            } else {
+              gt.data()[b].data()(itau,f1,f2) =
+                  ga(alps::gf::itime_index(itau), alps::gf::index(f1+offset), alps::gf::index(f2+offset));
+            }
           }
         }
       }
@@ -138,7 +143,7 @@ namespace detail {
   }
 
   template<typename GA, typename GT>
-  void copy_Gl(const GA &ga, GT &gt) {
+  void copy_Gl(const GA &ga, GT &gt, bool assume_real=false) {
     const auto num_blocks = gt.data().size();
     const auto n_tau = gt.data()[0].data().shape()[0];
 
@@ -154,7 +159,11 @@ namespace detail {
       for (auto il = 0; il < n_tau; ++il) {
         for (auto f1 = 0; f1 < num_flavors_block; ++f1) {
           for (auto f2 = 0; f2 < num_flavors_block; ++f2) {
-            gt.data()[b].data()(il,f1,f2) = ga[f1+offset][f2+offset][il];
+            if (assume_real) {
+              gt.data()[b].data()(il,f1,f2) = ga[f1+offset][f2+offset][il].real();
+            } else {
+              gt.data()[b].data()(il,f1,f2) = ga[f1+offset][f2+offset][il];
+            }
           }
         }
       }

@@ -9,6 +9,9 @@ using indices_map_t = std::map<triqs::operators::indices_t,triqs::operators::ind
 // All the arguments of the solve function
 struct solve_parameters_t {
 
+ /// If assume_real == true, the real-number solver will be used. Otherwise, the complex version will called.
+ bool assume_real;
+ 
  /// Interacting part of the atomic Hamiltonian
  /// type: Operator
  many_body_op_t h_int;
