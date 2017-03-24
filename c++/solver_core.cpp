@@ -280,12 +280,12 @@ void solver_core::solve(solve_parameters_t const &params) {
     using alps_gtau_t = alps::cthyb::MatrixSolver<std::complex<double> >::G1_tau_t;
     detail::copy_from_alps_to_triqs_gf(
         boost::any_cast<const alps_gtau_t&>(alps_results.at("gtau")),
-        _G_tau
+        _G_tau, assume_real
     );
 
     detail::copy_Gl(
         boost::any_cast<const boost::multi_array<std::complex<double>, 3>& >(alps_results.at("G1_LEGENDRE")),
-        _G_l
+        _G_l, assume_real
     );
   }
 

@@ -2,10 +2,22 @@ from alps_cthyb import SolverCore
 from pytriqs.gf.local import *
 import pytriqs.utility.mpi as mpi
 import numpy as np
+from pytriqs.archive import HDFArchive
+
+def make_real(bGf):
+    for name, g in bGf:
+        if type(g) == GfImFreq:
+            bGf[name] = g.make_real_in_tau()
+        elif type(g) == GfImTime:
+            g.data[:,:,:] = g.data.real
+            g.tail.data[:,:] = g.tail.data.real
+        else:
+            raise RuntimeError("Unsupported type " + str(type(g)))
+
 
 class Solver(SolverCore):
 
-    def __init__(self, beta, gf_struct, n_iw=1025, n_tau=10001, n_l=30):
+    def __init__(self, beta, assume_real, gf_struct, n_iw=1025, n_tau=10001, n_l=30):
         """
         Initialise the solver.
 
@@ -19,6 +31,7 @@ class Solver(SolverCore):
                     Green's function as a string to a list of integer
                     indices.
                     For example: ``{'up': [1,2,3], 'down', [1,2,3]}``.
+        assume_real : set True to use the real solver. Otherwise, the complex solver will be used.
         n_iw : integer, optional
                Number of Matsubara frequencies used for the Green's functions.
         n_tau : integer, optional
@@ -36,6 +49,10 @@ class Solver(SolverCore):
         self.gf_struct = gf_struct
         self.n_iw = n_iw
         self.n_tau = n_tau
+        self.assume_real = assume_real
+
+        if assume_real:
+            make_real(self.G_iw)
 
     def solve(self, **params_kw):
         """
@@ -62,6 +79,11 @@ class Solver(SolverCore):
         fit_max_n : integer, optional, default = ``n_iw``
                     Index of ``iw`` to fit until.
         """
+
+        if self.assume_real:
+            make_real(self.G0_iw)
+
+        assert params_kw['assume_real'] == self.assume_real
 
         perform_post_proc = params_kw.pop("perform_post_proc", True)
         perform_tail_fit = params_kw.pop("perform_tail_fit", False)
@@ -94,6 +116,9 @@ class Solver(SolverCore):
         # Call the core solver's solve routine
         solve_status = SolverCore.solve(self, **params_kw)
 
+        if self.assume_real:
+            make_real(self.G_tau)
+
         # Post-processing:
         # (only supported for G_tau, to permit compatibility with dft_tools)
         if perform_post_proc:
@@ -101,6 +126,13 @@ class Solver(SolverCore):
             for name, g in self.G_tau: self.G_iw[name] << Fourier(g)
             # Solve Dyson's eq to obtain Sigma_iw and G_iw and fit the tail
             self.Sigma_iw = dyson(G0_iw=self.G0_iw,G_iw=self.G_iw)
+            if self.assume_real:
+                make_real(self.Sigma_iw)
+            #f = HDFArchive('debug.h5','w')
+            #f['G0_iw'] = self.G0_iw
+            #f['G_tau'] = self.G_tau
+            #f['G_iw'] = self.G_iw
+            #f['Sigma_iw'] = self.Sigma_iw
             if perform_tail_fit: tail_fit(Sigma_iw=self.Sigma_iw,G0_iw=self.G0_iw,G_iw=self.G_iw,\
                                           fit_min_n=fit_min_n,fit_max_n=fit_max_n,fit_min_w=fit_min_w,fit_max_w=fit_max_w,\
                                           fit_max_moment=fit_max_moment,fit_known_moments=fit_known_moments)
