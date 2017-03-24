@@ -13,7 +13,6 @@ namespace triqs { namespace py_tools {
 template <> struct py_converter<solve_parameters_t> {
  static PyObject *c2py(solve_parameters_t const & x) {
   PyObject * d = PyDict_New();
-  PyDict_SetItemString( d, "assume_real"   , convert_to_python(x.assume_real));
   PyDict_SetItemString( d, "h_int"         , convert_to_python(x.h_int));
   PyDict_SetItemString( d, "random_seed"   , convert_to_python(x.random_seed));
   PyDict_SetItemString( d, "max_time"      , convert_to_python(x.max_time));
@@ -38,7 +37,6 @@ template <> struct py_converter<solve_parameters_t> {
 
  static solve_parameters_t py2c(PyObject *dic) {
   solve_parameters_t res;
-  res.assume_real = convert_from_python<bool>(PyDict_GetItemString(dic, "assume_real"));
   res.h_int = convert_from_python<many_body_op_t>(PyDict_GetItemString(dic, "h_int"));
   _get_optional(dic, "random_seed"   , res.random_seed      ,34788+928374*triqs::mpi::communicator().rank());
   _get_optional(dic, "max_time"      , res.max_time         ,-1);
@@ -74,7 +72,7 @@ template <> struct py_converter<solve_parameters_t> {
   std::stringstream fs, fs2; int err=0;
 
 #ifndef TRIQS_ALLOW_UNUSED_PARAMETERS
-  std::vector<std::string> ks, all_keys = {"assume_real","h_int","random_seed","max_time","verbosity","imag_threshold"};
+  std::vector<std::string> ks, all_keys = {"h_int","random_seed","max_time","verbosity","imag_threshold"};
   pyref keys = PyDict_Keys(dic);
   if (!convertible_from_python<std::vector<std::string>>(keys, true)) {
    fs << "\nThe dict keys are not strings";
@@ -86,7 +84,6 @@ template <> struct py_converter<solve_parameters_t> {
     fs << "\n"<< ++err << " The parameter '" << k << "' is not recognized.";
 #endif
 
-  _check_mandatory<bool          >(dic, fs, err, "assume_real"   , "bool");
   _check_mandatory<many_body_op_t>(dic, fs, err, "h_int"         , "many_body_op_t");
   _check_optional <int           >(dic, fs, err, "random_seed"   , "int");
   _check_optional <int           >(dic, fs, err, "max_time"      , "int");

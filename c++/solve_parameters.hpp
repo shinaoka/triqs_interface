@@ -10,7 +10,7 @@ using indices_map_t = std::map<triqs::operators::indices_t,triqs::operators::ind
 struct solve_parameters_t {
 
  /// If assume_real == true, the real-number solver will be used. Otherwise, the complex version will called.
- bool assume_real;
+ //bool assume_real;
  
  /// Interacting part of the atomic Hamiltonian
  /// type: Operator

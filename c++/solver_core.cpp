@@ -16,10 +16,11 @@ struct index_visitor {
 
 solver_core::solver_core(double beta_,
                          std::map<std::string, indices_type> const &gf_struct_,
+                         bool assume_real,
                          int n_iw,
                          int n_tau,
                          int n_l) :
-    beta(beta_), gf_struct(gf_struct_), num_flavors(0), n_iw_(n_iw), n_tau_(n_tau), n_l_(n_l) {
+    beta(beta_), gf_struct(gf_struct_), assume_real_(assume_real), num_flavors(0), n_iw_(n_iw), n_tau_(n_tau), n_l_(n_l) {
 
   if (n_tau < 2 * n_iw) {
     TRIQS_RUNTIME_ERROR << "Must use as least twice as many tau points as Matsubara frequencies: n_iw = " << n_iw
@@ -225,8 +226,7 @@ void solver_core::solve(solve_parameters_t const &params) {
   par["verbose"] = params.verbosity == 0 ? 0 : 1;
   par["SEED"] = params.random_seed;
 
-  bool assume_real = false;
-  if (assume_real) {
+  if (assume_real_) {
     par["algorithm"] = "real-matrix";
   } else {
     par["algorithm"] = "complex-matrix";
@@ -242,20 +242,20 @@ void solver_core::solve(solve_parameters_t const &params) {
   par["model.beta"] = beta;
   par["model.command_line_mode"] = true;
   par["model.coulomb_tensor_Re"] = std::vector<double>(Uijkl_Re.origin(), Uijkl_Re.origin() + Uijkl_Re.num_elements());
-  if (assume_real) {
+  if (assume_real_) {
     par["model.coulomb_tensor_Im"] = std::vector<double>(0.0, Uijkl_Im.num_elements());
   } else {
     par["model.coulomb_tensor_Im"] = std::vector<double>(Uijkl_Im.origin(), Uijkl_Im.origin() + Uijkl_Im.num_elements());
   }
   par["model.hopping_matrix_Re"] = h_loc_vec_Re;
-  if (assume_real) {
+  if (assume_real_) {
     par["model.hopping_matrix_Im"] = std::vector<double>(0.0, h_loc_vec_Im.size());
   } else {
     par["model.hopping_matrix_Im"] = h_loc_vec_Im;
   }
   par["model.n_tau_hyb"] = n_tau_ - 1;
   par["model.delta_Re"] = std::vector<double>(delta_tau_Re_.origin(), delta_tau_Re_.origin()+delta_tau_Re_.num_elements());
-  if (assume_real) {
+  if (assume_real_) {
     par["model.delta_Im"] = std::vector<double>(0.0, delta_tau_Im_.num_elements());
   } else {
     par["model.delta_Im"] = std::vector<double>(delta_tau_Im_.origin(), delta_tau_Im_.origin()+delta_tau_Im_.num_elements());
@@ -280,12 +280,12 @@ void solver_core::solve(solve_parameters_t const &params) {
     using alps_gtau_t = alps::cthyb::MatrixSolver<std::complex<double> >::G1_tau_t;
     detail::copy_from_alps_to_triqs_gf(
         boost::any_cast<const alps_gtau_t&>(alps_results.at("gtau")),
-        _G_tau, assume_real
+        _G_tau, assume_real_
     );
 
     detail::copy_Gl(
         boost::any_cast<const boost::multi_array<std::complex<double>, 3>& >(alps_results.at("G1_LEGENDRE")),
-        _G_l, assume_real
+        _G_l, assume_real_
     );
   }
 

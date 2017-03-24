@@ -43,6 +43,7 @@ class solver_core {
  double beta;                                   // inverse temperature
  //atom_diag h_diag;                              // diagonalization of the local problem
  std::map<std::string, indices_type> gf_struct; // Block structure of the Green function FIXME
+ bool assume_real_;                             // Assume real Hamiltonian
  many_body_op_t _h_loc;                         // The local Hamiltonian = h_int + h0
  block_gf<imfreq> _G0_iw;                       // Green's function containers: imaginary-freq Green's functions
  block_gf<imtime> _Delta_tau, _G_tau;           // Green's function containers: imaginary-time Green's functions
@@ -59,7 +60,7 @@ class solver_core {
  int _solve_status;                             // Status of the solve upon exit: 0 for clean termination, > 0 otherwise.
 
  public:
- solver_core(double beta, std::map<std::string, indices_type> const & gf_struct, int n_iw=1025, int n_tau=10001, int n_l=50);
+ solver_core(double beta, std::map<std::string, indices_type> const & gf_struct, bool assume_real, int n_iw=1025, int n_tau=10001, int n_l=50);
 
  /// Solve the impurity problem for the given Hamiltonian h_loc and with specified parameters params.
  TRIQS_WRAP_ARG_AS_DICT // Wrap the solver parameters as a dictionary in python with the clang tool

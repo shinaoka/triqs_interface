@@ -35,15 +35,13 @@ c = class_(
         doc = r"Core class of the ALPS cthyb solver",   # doc of the C++ class
 )
 
-c.add_constructor("""(double beta, std::map<std::string,indices_type> gf_struct, int n_iw = 1025, int n_tau = 10001, int n_l = 50)""",
+c.add_constructor("""(double beta, std::map<std::string,indices_type> gf_struct, bool assume_real, int n_iw = 1025, int n_tau = 10001, int n_l = 50)""",
                   doc = """ """)
 
 c.add_method("""void solve (**alps_cthyb::solve_parameters_t)""",
              doc = """+----------------+----------+------------------------------------+------------------------------------------------------------------------------------------------------------------------+
 | Parameter Name | Type     | Default                            | Documentation                                                                                                          |
 +================+==========+====================================+========================================================================================================================+
-| assume_real    | bool     |                                    | If assume_real == true, the real-number solver will be used. Otherwise, the complex version will called.               |
-+----------------+----------+------------------------------------+------------------------------------------------------------------------------------------------------------------------+
 | h_int          | Operator |                                    | Interacting part of the atomic Hamiltonian                                                                             |
 +----------------+----------+------------------------------------+------------------------------------------------------------------------------------------------------------------------+
 | random_seed    | int      | 34788 + 928374 * MPI.rank          | Seed for random number generator                                                                                       |
