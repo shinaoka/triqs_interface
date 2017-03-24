@@ -243,20 +243,20 @@ void solver_core::solve(solve_parameters_t const &params) {
   par["model.command_line_mode"] = true;
   par["model.coulomb_tensor_Re"] = std::vector<double>(Uijkl_Re.origin(), Uijkl_Re.origin() + Uijkl_Re.num_elements());
   if (assume_real_) {
-    par["model.coulomb_tensor_Im"] = std::vector<double>(0.0, Uijkl_Im.num_elements());
+    par["model.coulomb_tensor_Im"] = std::vector<double>(Uijkl_Im.num_elements(), 0.0);
   } else {
     par["model.coulomb_tensor_Im"] = std::vector<double>(Uijkl_Im.origin(), Uijkl_Im.origin() + Uijkl_Im.num_elements());
   }
   par["model.hopping_matrix_Re"] = h_loc_vec_Re;
   if (assume_real_) {
-    par["model.hopping_matrix_Im"] = std::vector<double>(0.0, h_loc_vec_Im.size());
+    par["model.hopping_matrix_Im"] = std::vector<double>(h_loc_vec_Im.size(), 0.0);
   } else {
     par["model.hopping_matrix_Im"] = h_loc_vec_Im;
   }
   par["model.n_tau_hyb"] = n_tau_ - 1;
   par["model.delta_Re"] = std::vector<double>(delta_tau_Re_.origin(), delta_tau_Re_.origin()+delta_tau_Re_.num_elements());
   if (assume_real_) {
-    par["model.delta_Im"] = std::vector<double>(0.0, delta_tau_Im_.num_elements());
+    par["model.delta_Im"] = std::vector<double>(delta_tau_Im_.num_elements(), 0.0);
   } else {
     par["model.delta_Im"] = std::vector<double>(delta_tau_Im_.origin(), delta_tau_Im_.origin()+delta_tau_Im_.num_elements());
   }
