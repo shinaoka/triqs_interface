@@ -5,6 +5,8 @@ This is a Python wapper of the efficient and general ALPSCore/CT-HYB solver for 
 Please follow the following steps.
 You must use the same C++ compiler and the same C++ standard (i.e., C++14) to build TRIQS, ALPSCore, ALPSCore/CT-HYB, and this wapper. We strongly recommend to use GCC or clang compilers because TRIQS uses very new features of C++. As of now, we did not successfully build TRIQS using Intel C++ compiler.
 
+Please use the latest versions of TRIQS, ALPSCore, ALPSCore/CT-HYB in the git repositories.
+
 ### TRIQS
 TRIQS and ALPSCore are independent sets of libraries. But, we strongly recommed you to install TRIQS first, because it requires the newer C++ standard. As of now (12/14/2016), TRIQS requires C++14.
 
@@ -51,6 +53,15 @@ the imaginary-time and Matsubara-frequency data are computed from the Legendre b
 If you set perform\_post\_proc = True, the self-energy will be computed in addition.
 
 An example Python script for a single-site impurity model is available [here](https://github.com/shinaoka/triqs_interface/blob/master/samples/aim_alps.py).
+
+## Program parameters
+| Parameter Name | Type     | Default                   | Documentation  |
+|:-----------|------------:|:------------:|:------------:|
+| h_int          | Operator | --                        | Interacting part of the atomic Hamiltonian |
+| random_seed    | int      | 34788 + 928374 * MPI.rank | Seed for random number generator|
+| max_time       | int      | -1 = 10 % of total simulation time             | Maximum runtime in seconds, use -1 to use a default value (10 % of total simulation time) |
+| verbosity      | int      | 0                         | Verbosity |
+| imag_threshold | double   | 1.e-15                    | Threshold below which imaginary components of Delta and h_loc are set to zero  |
 
 ## License
 This application is licensed under GPLv3.

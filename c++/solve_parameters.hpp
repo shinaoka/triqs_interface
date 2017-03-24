@@ -44,8 +44,8 @@ struct solve_parameters_t {
  /// type: str
  //std::string random_name = "";
 
- /// Maximum runtime in seconds, use -1 to set infinite
- /// default: -1 = infinite
+ /// Maximum runtime in seconds, Maximum runtime in seconds, use -1 to use a default value (10 % of total simulation time)
+ /// default: -1 = 10 % of total simulation time
  int max_time = -1;
 
  /// Verbosity level
