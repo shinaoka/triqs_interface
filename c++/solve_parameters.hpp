@@ -97,6 +97,9 @@ struct solve_parameters_t {
  /// Threshold below which imaginary components of Delta and h_loc are set to zero
  double imag_threshold = 1.e-15;
 
+ /// 0 : no rotation, 1 : diagonalize the local transfer matrix
+ int basis_rotation = 0;
+
  solve_parameters_t() {}
 
  //solve_parameters_t(many_body_op_t h_int, int n_cycles) : h_int(h_int), n_cycles(n_cycles) {}

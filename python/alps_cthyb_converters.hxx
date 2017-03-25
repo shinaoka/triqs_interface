@@ -18,6 +18,7 @@ template <> struct py_converter<solve_parameters_t> {
   PyDict_SetItemString( d, "max_time"      , convert_to_python(x.max_time));
   PyDict_SetItemString( d, "verbosity"     , convert_to_python(x.verbosity));
   PyDict_SetItemString( d, "imag_threshold", convert_to_python(x.imag_threshold));
+  PyDict_SetItemString( d, "basis_rotation", convert_to_python(x.basis_rotation));
   return d;
  }
 
@@ -42,6 +43,7 @@ template <> struct py_converter<solve_parameters_t> {
   _get_optional(dic, "max_time"      , res.max_time         ,-1);
   _get_optional(dic, "verbosity"     , res.verbosity        ,0);
   _get_optional(dic, "imag_threshold", res.imag_threshold   ,1.e-15);
+  _get_optional(dic, "basis_rotation", res.basis_rotation   ,0);
   return res;
  }
 
@@ -72,7 +74,7 @@ template <> struct py_converter<solve_parameters_t> {
   std::stringstream fs, fs2; int err=0;
 
 #ifndef TRIQS_ALLOW_UNUSED_PARAMETERS
-  std::vector<std::string> ks, all_keys = {"h_int","random_seed","max_time","verbosity","imag_threshold"};
+  std::vector<std::string> ks, all_keys = {"h_int","random_seed","max_time","verbosity","imag_threshold","basis_rotation"};
   pyref keys = PyDict_Keys(dic);
   if (!convertible_from_python<std::vector<std::string>>(keys, true)) {
    fs << "\nThe dict keys are not strings";
@@ -89,6 +91,7 @@ template <> struct py_converter<solve_parameters_t> {
   _check_optional <int           >(dic, fs, err, "max_time"      , "int");
   _check_optional <int           >(dic, fs, err, "verbosity"     , "int");
   _check_optional <double        >(dic, fs, err, "imag_threshold", "double");
+  _check_optional <int           >(dic, fs, err, "basis_rotation", "int");
   if (err) goto _error;
   return true;
 

@@ -8,11 +8,14 @@
  *
  ******************************************************************************/
 #pragma once
+#include <complex>
+
 #include <triqs/mc_tools.hpp>
 #include <triqs/utility/callbacks.hpp>
 #include <triqs/operators/many_body_operator.hpp>
 #include <triqs/statistics/histograms.hpp>
 #include <triqs/gfs/functions/functions.hpp>
+#include <triqs/arrays/linalg/eigenelements.hpp>
 
 #include <alps/params.hpp>
 
@@ -39,9 +42,7 @@ class solver_core {
  int n_iw_;
  int n_tau_;
  int n_l_;
- //int n_tau_hyb_;
  double beta;                                   // inverse temperature
- //atom_diag h_diag;                              // diagonalization of the local problem
  std::map<std::string, indices_type> gf_struct; // Block structure of the Green function FIXME
  bool assume_real_;                             // Assume real Hamiltonian
  many_body_op_t _h_loc;                         // The local Hamiltonian = h_int + h0

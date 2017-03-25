@@ -155,7 +155,10 @@ void solver_core::solve(solve_parameters_t const &params) {
   int b = 0;
   int offset = 0;
   _h_loc = params.h_int;
+  std::vector<triqs::arrays::matrix<dcomplex> > h_loc_block_mat;
   for (auto const &bl: gf_struct) {
+    h_loc_block_mat.push_back(triqs::arrays::matrix<dcomplex>(num_flavors, num_flavors));
+    std::fill(h_loc_block_mat.back().begin(), h_loc_block_mat.back().end(), 0.0);
 
     int n1 = 0;
     for (auto const &a1: bl.second) {
@@ -172,6 +175,7 @@ void solver_core::solve(solve_parameters_t const &params) {
         const int flavor2 = linindex[std::make_pair(b, n2)];
         h_loc_vec_Re[flavor1*num_flavors + flavor2] = e_ij.real();
         h_loc_vec_Im[flavor1*num_flavors + flavor2] = e_ij.imag();
+        h_loc_block_mat.back()(flavor1, flavor2) = e_ij;
 
         n2++;
       }
@@ -210,6 +214,44 @@ void solver_core::solve(solve_parameters_t const &params) {
       }
       b++;
       offset += num_flavors_block;
+    }
+  }
+
+  //Determine to solve the model
+  //triqs::arrays::matrix<dcomplex> rot_mat(num_flavors, num_flavors);
+  std::vector<double> rot_mat_vec_Re(num_flavors * num_flavors, 0.0);
+  std::vector<double> rot_mat_vec_Im(num_flavors * num_flavors, 0.0);
+  if (params.basis_rotation == 0) {
+    if (params.verbosity > 0) {
+      std::cout << "No transformation ..." << std::endl;
+    }
+    //diagonal matrix
+    for (int flavor = 0; flavor < num_flavors; ++flavor) {
+      rot_mat_vec_Re[flavor*num_flavors + flavor] = 1.0;
+    }
+  } else if (params.basis_rotation == 1) {
+    if (params.verbosity > 0) {
+      std::cout << "Diagonalizing local transfer matrix..." << std::endl;
+    }
+    int offset = 0;
+    int b = 0;
+    for (auto const &bl: gf_struct) {
+      triqs::arrays::linalg::eigenelements_worker<dcomplex> worker;
+      auto r = worker.eigenelements(h_loc_block_mat[b]);
+
+      int n1 = 0;
+      for (auto const &a1: bl.second) {
+        int n2 = 0;
+        for (auto const &a2 : bl.second) {
+          rot_mat_vec_Re[(offset+n1)*num_flavors + (offset+n2)] = r.second(n1, n2).real();
+          rot_mat_vec_Im[(offset+n1)*num_flavors + (offset+n2)] =
+              assume_real_ == 0 ? 0.0 : r.second(n1, n2).imag();
+          ++ n2;
+        }
+        ++ n1;
+      }
+      offset += bl.second.size();
+      ++ b;
     }
   }
 
@@ -261,12 +303,19 @@ void solver_core::solve(solve_parameters_t const &params) {
     par["model.delta_Im"] = std::vector<double>(delta_tau_Im_.origin(), delta_tau_Im_.origin()+delta_tau_Im_.num_elements());
   }
 
+  par["model.rot_mat_Re"] = rot_mat_vec_Re;
+  par["model.rot_mat_Im"] = rot_mat_vec_Im;
+
   par["measurement.G1.n_legendre"] = n_l_;
   par["measurement.G1.n_tau"] = n_tau_ - 1;//Note: the minus 1
   par["measurement.G1.n_matsubara"] = n_iw_;
 
   // Call the ALPS CT-HYB solver
-  p_solver.reset(new alps::cthyb::MatrixSolver<std::complex<double> >(par));
+  if (assume_real_) {
+    p_solver.reset(new alps::cthyb::MatrixSolver<double>(par));
+  } else {
+    p_solver.reset(new alps::cthyb::MatrixSolver<std::complex<double> >(par));
+  }
   p_solver->solve();
 
   if (alps::mpi::communicator().rank() == 0) {
