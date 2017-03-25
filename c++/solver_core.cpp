@@ -157,7 +157,7 @@ void solver_core::solve(solve_parameters_t const &params) {
   _h_loc = params.h_int;
   std::vector<triqs::arrays::matrix<dcomplex> > h_loc_block_mat;
   for (auto const &bl: gf_struct) {
-    h_loc_block_mat.push_back(triqs::arrays::matrix<dcomplex>(num_flavors, num_flavors));
+    h_loc_block_mat.push_back(triqs::arrays::matrix<dcomplex>(bl.second.size(), bl.second.size()));
     std::fill(h_loc_block_mat.back().begin(), h_loc_block_mat.back().end(), 0.0);
 
     int n1 = 0;
@@ -244,8 +244,7 @@ void solver_core::solve(solve_parameters_t const &params) {
         int n2 = 0;
         for (auto const &a2 : bl.second) {
           rot_mat_vec_Re[(offset+n1)*num_flavors + (offset+n2)] = r.second(n1, n2).real();
-          rot_mat_vec_Im[(offset+n1)*num_flavors + (offset+n2)] =
-              assume_real_ == 0 ? 0.0 : r.second(n1, n2).imag();
+          rot_mat_vec_Im[(offset+n1)*num_flavors + (offset+n2)] = assume_real_ ? 0.0 : r.second(n1, n2).imag();
           ++ n2;
         }
         ++ n1;
@@ -253,6 +252,8 @@ void solver_core::solve(solve_parameters_t const &params) {
       offset += bl.second.size();
       ++ b;
     }
+  } else {
+    throw std::runtime_error("Unknown value of basis_rotation");
   }
 
   // Determine which solver to be used the real-number solver or the complex-number solver
