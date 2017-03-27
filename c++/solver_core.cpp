@@ -175,7 +175,7 @@ void solver_core::solve(solve_parameters_t const &params) {
         const int flavor2 = linindex[std::make_pair(b, n2)];
         h_loc_vec_Re[flavor1*num_flavors + flavor2] = e_ij.real();
         h_loc_vec_Im[flavor1*num_flavors + flavor2] = e_ij.imag();
-        h_loc_block_mat.back()(flavor1, flavor2) = e_ij;
+        h_loc_block_mat.back()(n1, n2) = e_ij;
 
         n2++;
       }
