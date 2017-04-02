@@ -100,6 +100,14 @@ class Solver(SolverCore):
             fit_max_w = params_kw.pop("fit_max_w", None)
             fit_max_moment = params_kw.pop("fit_max_moment", None)
             fit_known_moments = params_kw.pop("fit_known_moments", None)
+        else:
+            #Just remove these options
+            params_kw.pop("fit_min_n", None)
+            params_kw.pop("fit_max_n", None)
+            params_kw.pop("fit_min_w", None)
+            params_kw.pop("fit_max_w", None)
+            params_kw.pop("fit_max_moment", None)
+            params_kw.pop("fit_known_moments", None)
 
         print_warning = False
         for name, indices in self.gf_struct.items():

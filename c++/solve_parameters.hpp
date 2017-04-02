@@ -44,9 +44,12 @@ struct solve_parameters_t {
  /// type: str
  //std::string random_name = "";
 
- /// Maximum runtime in seconds, Maximum runtime in seconds, use -1 to use a default value (10 % of total simulation time)
- /// default: -1 = 10 % of total simulation time
+ /// Maximum runtime in seconds, Maximum runtime in seconds, use -1 to use a default value
  int max_time = -1;
+
+ /// Thermalization time in seconds
+ /// default: -1 = 10 % of total simulation time
+ int thermalization_time = -1;
 
  /// Verbosity level
  /// default: 3 on MPI rank 0, 0 otherwise.

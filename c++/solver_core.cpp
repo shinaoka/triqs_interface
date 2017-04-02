@@ -266,6 +266,11 @@ void solver_core::solve(solve_parameters_t const &params) {
       (params.max_time > 0 && params.max_time < ULONG_MAX)
       ? params.max_time : ULONG_MAX
   );
+  if (params.thermalization_time <= 1.0 || static_cast<double>(params.thermalization_time) > 0.9*static_cast<double>(par["timelimit"])) {
+      //use default value
+  } else {
+      par["thermalization_time"] = params.thermalization_time;
+  }
   par["verbose"] = params.verbosity == 0 ? 0 : 1;
   par["SEED"] = params.random_seed;
 
