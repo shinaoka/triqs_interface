@@ -13,12 +13,13 @@ namespace triqs { namespace py_tools {
 template <> struct py_converter<solve_parameters_t> {
  static PyObject *c2py(solve_parameters_t const & x) {
   PyObject * d = PyDict_New();
-  PyDict_SetItemString( d, "h_int"         , convert_to_python(x.h_int));
-  PyDict_SetItemString( d, "random_seed"   , convert_to_python(x.random_seed));
-  PyDict_SetItemString( d, "max_time"      , convert_to_python(x.max_time));
-  PyDict_SetItemString( d, "verbosity"     , convert_to_python(x.verbosity));
-  PyDict_SetItemString( d, "imag_threshold", convert_to_python(x.imag_threshold));
-  PyDict_SetItemString( d, "basis_rotation", convert_to_python(x.basis_rotation));
+  PyDict_SetItemString( d, "h_int"           , convert_to_python(x.h_int));
+  PyDict_SetItemString( d, "random_seed"     , convert_to_python(x.random_seed));
+  PyDict_SetItemString( d, "max_time"        , convert_to_python(x.max_time));
+  PyDict_SetItemString( d, "verbosity"       , convert_to_python(x.verbosity));
+  PyDict_SetItemString( d, "imag_threshold"  , convert_to_python(x.imag_threshold));
+  PyDict_SetItemString( d, "basis_rotation"  , convert_to_python(x.basis_rotation));
+  PyDict_SetItemString( d, "params_dump_file", convert_to_python(x.params_dump_file));
   return d;
  }
 
@@ -39,11 +40,12 @@ template <> struct py_converter<solve_parameters_t> {
  static solve_parameters_t py2c(PyObject *dic) {
   solve_parameters_t res;
   res.h_int = convert_from_python<many_body_op_t>(PyDict_GetItemString(dic, "h_int"));
-  _get_optional(dic, "random_seed"   , res.random_seed      ,34788+928374*triqs::mpi::communicator().rank());
-  _get_optional(dic, "max_time"      , res.max_time         ,-1);
-  _get_optional(dic, "verbosity"     , res.verbosity        ,0);
-  _get_optional(dic, "imag_threshold", res.imag_threshold   ,1.e-15);
-  _get_optional(dic, "basis_rotation", res.basis_rotation   ,0);
+  _get_optional(dic, "random_seed"     , res.random_seed        ,34788+928374*triqs::mpi::communicator().rank());
+  _get_optional(dic, "max_time"        , res.max_time           ,-1);
+  _get_optional(dic, "verbosity"       , res.verbosity          ,0);
+  _get_optional(dic, "imag_threshold"  , res.imag_threshold     ,1.e-15);
+  _get_optional(dic, "basis_rotation"  , res.basis_rotation     ,0);
+  _get_optional(dic, "params_dump_file", res.params_dump_file   ,"");
   return res;
  }
 
@@ -74,7 +76,7 @@ template <> struct py_converter<solve_parameters_t> {
   std::stringstream fs, fs2; int err=0;
 
 #ifndef TRIQS_ALLOW_UNUSED_PARAMETERS
-  std::vector<std::string> ks, all_keys = {"h_int","random_seed","max_time","verbosity","imag_threshold","basis_rotation"};
+  std::vector<std::string> ks, all_keys = {"h_int","random_seed","max_time","verbosity","imag_threshold","basis_rotation","params_dump_file"};
   pyref keys = PyDict_Keys(dic);
   if (!convertible_from_python<std::vector<std::string>>(keys, true)) {
    fs << "\nThe dict keys are not strings";
@@ -86,12 +88,13 @@ template <> struct py_converter<solve_parameters_t> {
     fs << "\n"<< ++err << " The parameter '" << k << "' is not recognized.";
 #endif
 
-  _check_mandatory<many_body_op_t>(dic, fs, err, "h_int"         , "many_body_op_t");
-  _check_optional <int           >(dic, fs, err, "random_seed"   , "int");
-  _check_optional <int           >(dic, fs, err, "max_time"      , "int");
-  _check_optional <int           >(dic, fs, err, "verbosity"     , "int");
-  _check_optional <double        >(dic, fs, err, "imag_threshold", "double");
-  _check_optional <int           >(dic, fs, err, "basis_rotation", "int");
+  _check_mandatory<many_body_op_t>(dic, fs, err, "h_int"           , "many_body_op_t");
+  _check_optional <int           >(dic, fs, err, "random_seed"     , "int");
+  _check_optional <int           >(dic, fs, err, "max_time"        , "int");
+  _check_optional <int           >(dic, fs, err, "verbosity"       , "int");
+  _check_optional <double        >(dic, fs, err, "imag_threshold"  , "double");
+  _check_optional <int           >(dic, fs, err, "basis_rotation"  , "int");
+  _check_optional <std::string   >(dic, fs, err, "params_dump_file", "std::string");
   if (err) goto _error;
   return true;
 

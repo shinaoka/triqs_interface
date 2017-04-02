@@ -243,8 +243,8 @@ void solver_core::solve(solve_parameters_t const &params) {
       for (auto const &a1: bl.second) {
         int n2 = 0;
         for (auto const &a2 : bl.second) {
-          rot_mat_vec_Re[(offset+n1)*num_flavors + (offset+n2)] = r.second(n1, n2).real();
-          rot_mat_vec_Im[(offset+n1)*num_flavors + (offset+n2)] = assume_real_ ? 0.0 : r.second(n1, n2).imag();
+          rot_mat_vec_Re[(offset+n1)*num_flavors + (offset+n2)] = r.second(n2, n1).real();
+          rot_mat_vec_Im[(offset+n1)*num_flavors + (offset+n2)] = assume_real_ ? 0.0 : r.second(n2, n1).imag();
           ++ n2;
         }
         ++ n1;
@@ -310,6 +310,12 @@ void solver_core::solve(solve_parameters_t const &params) {
   par["measurement.G1.n_legendre"] = n_l_;
   par["measurement.G1.n_tau"] = n_tau_ - 1;//Note: the minus 1
   par["measurement.G1.n_matsubara"] = n_iw_;
+
+  if (params.params_dump_file != "" && alps::mpi::communicator().rank() == 0) {
+    alps::hdf5::archive oar(params.params_dump_file, "w");
+    par.save(oar);
+    oar.close();
+  }
 
   // Call the ALPS CT-HYB solver
   if (assume_real_) {

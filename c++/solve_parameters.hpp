@@ -100,6 +100,9 @@ struct solve_parameters_t {
  /// 0 : no rotation, 1 : diagonalize the local transfer matrix
  int basis_rotation = 0;
 
+ /// Dump parameters passed to ALPSCore/CT-HYB into a file
+ std::string params_dump_file = "";
+
  solve_parameters_t() {}
 
  //solve_parameters_t(many_body_op_t h_int, int n_cycles) : h_int(h_int), n_cycles(n_cycles) {}
