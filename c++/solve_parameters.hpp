@@ -104,7 +104,7 @@ struct solve_parameters_t {
  int basis_rotation = 0;
 
  /// Dump parameters passed to ALPSCore/CT-HYB into a file
- std::string params_dump_file = "";
+ //std::string params_dump_file = "";
 
  solve_parameters_t() {}
 

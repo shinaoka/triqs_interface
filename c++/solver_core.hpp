@@ -121,7 +121,10 @@ namespace detail {
     int num_flavors = 0;
     for (int b : range(num_blocks)) {
       num_flavors += gt.data()[b].data().shape()[1];
+      assert(gt.data()[b].data().shape()[1]==gt.data()[b].data().shape()[2]);
     }
+
+    assert(n_tau == ga.mesh1().extent());
 
     int offset = 0;
     for (int b : range(num_blocks)) {

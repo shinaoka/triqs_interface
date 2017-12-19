@@ -144,7 +144,7 @@ void solver_core::solve(solve_parameters_t const &params) {
     Uijkl_Im[indices[0]][indices[1]][indices[2]][indices[3]] += 2*(it->coef).imag();
   }
 
-  // Do I have imaginary components in my local Hamiltonian?
+  // Check if local Hamiltonian has non-zero imaginary components
   auto max_imag = 0.0;
   for (int b : range(gf_struct.size())) {
     max_imag = std::max(max_imag, max_element(abs(real(_G0_iw[b].singularity()(2)))));
@@ -192,7 +192,9 @@ void solver_core::solve(solve_parameters_t const &params) {
     triqs::clef::placeholder<0> iw_;
     int offset = 0;
     delta_tau_Re_.resize(boost::extents[n_tau_][num_flavors][num_flavors]);
+    std::fill(delta_tau_Re_.origin(), delta_tau_Re_.origin()+delta_tau_Re_.num_elements(), 0.0);
     delta_tau_Im_.resize(boost::extents[n_tau_][num_flavors][num_flavors]);
+    std::fill(delta_tau_Im_.origin(), delta_tau_Im_.origin()+delta_tau_Im_.num_elements(), 0.0);
     for (auto const &bl : gf_struct) {
       Delta_iw[b](iw_) << G0_iw_inv[b].singularity()(-1) * iw_ + G0_iw_inv[b].singularity()(0);
       Delta_iw[b] = Delta_iw[b] - G0_iw_inv[b];
@@ -217,8 +219,7 @@ void solver_core::solve(solve_parameters_t const &params) {
     }
   }
 
-  //Determine to solve the model
-  //triqs::arrays::matrix<dcomplex> rot_mat(num_flavors, num_flavors);
+  //Determine single-particle basis for solving the model
   std::vector<double> rot_mat_vec_Re(num_flavors * num_flavors, 0.0);
   std::vector<double> rot_mat_vec_Im(num_flavors * num_flavors, 0.0);
   if (params.basis_rotation == 0) {
@@ -280,6 +281,9 @@ void solver_core::solve(solve_parameters_t const &params) {
     par["algorithm"] = "complex-matrix";
   }
 
+  //DEBUG
+  par["sliding_window.max"] = 1;
+
   if (num_flavors % 2 == 0) {
     par["model.sites"] = num_flavors/2;
     par["model.spins"] = 2;
@@ -316,11 +320,29 @@ void solver_core::solve(solve_parameters_t const &params) {
   par["measurement.G1.n_tau"] = n_tau_ - 1;//Note: the minus 1
   par["measurement.G1.n_matsubara"] = n_iw_;
 
-  if (params.params_dump_file != "" && alps::mpi::communicator().rank() == 0) {
-    alps::hdf5::archive oar(params.params_dump_file, "w");
-    par.save(oar);
-    oar.close();
+/*
+  if (params.params_dump_file != "") {
+    if (alps::mpi::communicator().rank() == 0) {
+        std::cout << "dumping to " << params.params_dump_file << std::endl;
+        for (int i=0; i < n_tau_; ++i) {
+           for (int j=0; j < 2; ++j) {
+             for (int k=0; k < 2; ++k) {
+               std::cout << i << " " << j << " " << k << " " << delta_tau_Re_[i][j][k] << " " << 0.0 << std::endl;
+             }
+           }
+        }
+        for (int i=0; i < h_loc_vec_Re.size(); ++i) {
+            std::cout << "h_loc " << i << " " << h_loc_vec_Re[i] << " " << h_loc_vec_Im[i] << std::endl;
+        }
+        for (int i=0; i < rot_mat_vec_Re.size(); ++i) {
+            std::cout << "rot_mat_vec_Re " << i << " " << rot_mat_vec_Re[i] << " " << rot_mat_vec_Im[i] << std::endl;
+        }
+        //alps::hdf5::archive oar(params.params_dump_file, "w");
+        //oar << par;
+        //oar.close();
+     }
   }
+*/
 
   // Call the ALPS CT-HYB solver
   if (assume_real_) {
@@ -333,7 +355,7 @@ void solver_core::solve(solve_parameters_t const &params) {
   if (alps::mpi::communicator().rank() == 0) {
     // Process results
     const auto &alps_results = p_solver->get_results();
-    if (params.verbosity >= 2) {
+    if (params.verbosity >= 0) {
       std::cout << "Average sign: " << boost::any_cast<double>(alps_results.at("Sign")) << std::endl;
     }
 
