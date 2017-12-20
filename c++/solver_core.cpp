@@ -281,9 +281,6 @@ void solver_core::solve(solve_parameters_t const &params) {
     par["algorithm"] = "complex-matrix";
   }
 
-  //DEBUG
-  par["sliding_window.max"] = 1;
-
   if (num_flavors % 2 == 0) {
     par["model.sites"] = num_flavors/2;
     par["model.spins"] = 2;
@@ -319,6 +316,10 @@ void solver_core::solve(solve_parameters_t const &params) {
   par["measurement.G1.n_legendre"] = n_l_;
   par["measurement.G1.n_tau"] = n_tau_ - 1;//Note: the minus 1
   par["measurement.G1.n_matsubara"] = n_iw_;
+
+  //if (alps::mpi::communicator().rank() == 0 && params.verbosity) {
+    //std::cout << std::endl << "Calling ALPSCore/CT-HYB with the following parameters (the others will be set to default values of the ALPSCore/CT-HYB)" << std::endl;
+  //}
 
 /*
   if (params.params_dump_file != "") {

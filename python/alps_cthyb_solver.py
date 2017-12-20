@@ -17,7 +17,7 @@ def make_real(bGf):
 
 class Solver(SolverCore):
 
-    def __init__(self, beta, assume_real, gf_struct, n_iw=1025, n_tau=10001, n_l=30):
+    def __init__(self, beta, assume_real, gf_struct, n_iw=1025, n_tau=10001, n_l=100):
         """
         Initialise the solver.
 
