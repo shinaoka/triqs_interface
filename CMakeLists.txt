@@ -2,7 +2,7 @@
 list(APPEND CMAKE_MODULE_PATH ${TRIQS_PATH}/share/triqs/cmake)
 
 # start configuration
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.1)
 project(alps_cthyb CXX)
 if (CMAKE_BUILD_TYPE STREQUAL "")
   set(CMAKE_BUILD_TYPE Release)
