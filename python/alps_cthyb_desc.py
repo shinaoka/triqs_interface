@@ -1,5 +1,5 @@
 # Generated automatically using the command :
-# c++2py.py ../c++/solver_core.hpp -p -mpytriqs.applications.impurity_solvers.alps_cthyb -o alps_cthyb --moduledoc "The ALPS cthyb solver" -I /opt/local/include/openmpi-clang38 -I /opt/ALPSCore/include
+# c++2py.py ../c++/solver_core.hpp -p -mpytriqs.applications.impurity_solvers.alps_cthyb -o alps_cthyb --moduledoc "The ALPS cthyb solver" -I /opt/ALPSCore/include -I /Users/hiroshi/opt/cthyb/include
 from wrap_generator import *
 
 # The module
@@ -35,25 +35,27 @@ c = class_(
         doc = r"Core class of the ALPS cthyb solver",   # doc of the C++ class
 )
 
-c.add_constructor("""(double beta, std::map<std::string,indices_type> gf_struct, bool assume_real, int n_iw = 1025, int n_tau = 10001, int n_l = 50)""",
+c.add_constructor("""(double beta, std::map<std::string,indices_type> gf_struct, bool assume_real, int n_iw, int n_tau, int n_l)""",
                   doc = """ """)
 
 c.add_method("""void solve (**alps_cthyb::solve_parameters_t)""",
-             doc = """+------------------+-------------+------------------------------------+------------------------------------------------------------------------------------------------------------------------+
-| Parameter Name   | Type        | Default                            | Documentation                                                                                                          |
-+==================+=============+====================================+========================================================================================================================+
-| h_int            | Operator    |                                    | Interacting part of the atomic Hamiltonian                                                                             |
-+------------------+-------------+------------------------------------+------------------------------------------------------------------------------------------------------------------------+
-| random_seed      | int         | 34788 + 928374 * MPI.rank          | Seed for random number generator                                                                                       |
-+------------------+-------------+------------------------------------+------------------------------------------------------------------------------------------------------------------------+
-| max_time         | int         | -1 = 10 % of total simulation time | Maximum runtime in seconds, Maximum runtime in seconds, use -1 to use a default value (10 % of total simulation time)  |
-+------------------+-------------+------------------------------------+------------------------------------------------------------------------------------------------------------------------+
-| verbosity        | int         | 0                                  |                                                                                                                        |
-+------------------+-------------+------------------------------------+------------------------------------------------------------------------------------------------------------------------+
-| imag_threshold   | double      | 1.e-15                             | Threshold below which imaginary components of Delta and h_loc are set to zero                                          |
-+------------------+-------------+------------------------------------+------------------------------------------------------------------------------------------------------------------------+
-| basis_rotation   | int         | 0                                  | 0 : no rotation, 1 : diagonalize the local transfer matrix                                                             |
-+------------------+-------------+------------------------------------+------------------------------------------------------------------------------------------------------------------------+ """)
+             doc = """+---------------------+----------+------------------------------------+----------------------------------------------------------------------------------------+
+| Parameter Name      | Type     | Default                            | Documentation                                                                          |
++=====================+==========+====================================+========================================================================================+
+| h_int               | Operator |                                    | Interacting part of the atomic Hamiltonian                                             |
++---------------------+----------+------------------------------------+----------------------------------------------------------------------------------------+
+| random_seed         | int      | 34788 + 928374 * MPI.rank          | Seed for random number generator                                                       |
++---------------------+----------+------------------------------------+----------------------------------------------------------------------------------------+
+| max_time            | int      | -1                                 | Maximum runtime in seconds, Maximum runtime in seconds, use -1 to use a default value  |
++---------------------+----------+------------------------------------+----------------------------------------------------------------------------------------+
+| thermalization_time | int      | -1 = 10 % of total simulation time | Thermalization time in seconds                                                         |
++---------------------+----------+------------------------------------+----------------------------------------------------------------------------------------+
+| verbosity           | int      | 0                                  |                                                                                        |
++---------------------+----------+------------------------------------+----------------------------------------------------------------------------------------+
+| imag_threshold      | double   | 1.e-15                             | Threshold below which imaginary components of Delta and h_loc are set to zero          |
++---------------------+----------+------------------------------------+----------------------------------------------------------------------------------------+
+| basis_rotation      | int      | 0                                  | 0 : no rotation, 1 : diagonalize the local transfer matrix                             |
++---------------------+----------+------------------------------------+----------------------------------------------------------------------------------------+ """)
 
 c.add_property(name = "h_loc",
                getter = cfunction("many_body_op_t h_loc ()"),
