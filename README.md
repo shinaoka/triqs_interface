@@ -60,6 +60,7 @@ An example Python script for a single-site impurity model is available [here](ht
 | h_int          | Operator | --                        | Interacting part of the atomic Hamiltonian |
 | random_seed    | int      | 34788 + 928374 * MPI.rank | Seed for random number generator|
 | max_time       | int      | -1 = 10 % of total simulation time             | Maximum runtime in seconds, use -1 to use a default value (10 % of total simulation time) |
+| thermalization_time | int      | -1 = 10 % of total simulation time | Thermalization time in seconds                                                         |  
 | verbosity      | int      | 0                         | Verbosity |
 | imag_threshold | double   | 1.e-15                    | Threshold below which imaginary components of Delta and h_loc are set to zero  |
 
