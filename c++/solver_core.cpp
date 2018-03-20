@@ -309,6 +309,9 @@ void solver_core::solve(solve_parameters_t const &params) {
   } else {
     par["model.delta_Im"] = std::vector<double>(delta_tau_Im_.origin(), delta_tau_Im_.origin()+delta_tau_Im_.num_elements());
   }
+  
+  // just work around
+  par["model.hermicity_tolerance"] = 1.0E+100;
 
   par["model.rot_mat_Re"] = rot_mat_vec_Re;
   par["model.rot_mat_Im"] = rot_mat_vec_Im;
