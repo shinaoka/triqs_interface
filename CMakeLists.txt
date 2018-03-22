@@ -18,15 +18,15 @@ find_package(TRIQS REQUIRED)
 find_package(ALPSCore REQUIRED)
 find_package(ALPSCoreCTHYB REQUIRED)
 
+# Check if 
+if (NOT ALPSCore_CXX_STD MATCHES "^[cC][+][+]14|custom$")
+    message(FATAL_ERROR "ALPSCore libraries was built with ${ALPSCore_CXX_STD}. Please rebuild ALPSCore libraries with C++14.")
+endif ()
+
 # We want to be installed in the TRIQS tree
 set(CMAKE_INSTALL_PREFIX ${TRIQS_PATH})
 
 # Add the compiling options (-D... ) for C++
-#message(STATUS ${CMAKE_CXX_FLAGS})
-#message(STATUS ${CMAKE_CXX_FLAGS_RELEASE})
-#message(STATUS ${TRIQS_CXX_DEFINITIONS})
-#message(STATUS ${CMAKE_BUILD_TYPE})
-message(STATUS "TRIQS : Adding compilation flags detected by the library (C++11/14, libc++, etc...) ")
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
   add_definitions(${TRIQS_CXX_DEFINITIONS} ${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_CXX_FLAGS} -DBOOST_DISABLE_ASSERTS)
 elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -38,7 +38,6 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
 endif()
 
 # Options for the compilation ...
-#target_link_libraries(alps_cthyb ${ALPSCore_LIBRARIES} ${ALPSCoreCTHYB_LIBRARIES})
 
 include_directories(${CMAKE_BINARY_DIR}/c++ c++)
 
