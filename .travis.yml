@@ -1,0 +1,78 @@
+language: cpp
+sudo: required
+dist: trusty
+
+compiler:
+    #- gcc
+  - clang
+
+before_install:
+  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+  - sudo apt-get update
+  - sudo apt-get install -y --allow-unauthenticated g++-6 clang-3.9
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 60 --slave /usr/bin/g++ g++ /usr/bin/g++-6
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 40 --slave /usr/bin/g++ g++ /usr/bin/g++-4.8
+  - sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.9 60 --slave /usr/bin/clang++ clang++ /usr/bin/clang++-3.9
+  - sudo apt-get install -y libboost-all-dev cmake git libgfortran3 gfortran openmpi-bin openmpi-common openmpi-doc libopenmpi-dev libblas-dev liblapack-dev libfftw3-dev libgmp-dev hdf5-tools libhdf5-serial-dev python-h5py python-dev python-numpy python-scipy python-jinja2 python-virtualenv python-matplotlib python-tornado python-zmq python-mpi4py python-mako clang-format-3.9 libclang-3.9-dev python-clang-3.9 python-sphinx libjs-mathjax valgrind
+  - export OMPI_CC=${CC}
+  - export OMPI_CXX=${CXX}
+
+branches:
+  only:
+    - master
+    - travis # To debug .travis.yml
+
+install: true
+
+script:
+  # Stop on first error
+  - set -e
+
+  # Create directory for installed prerequisites
+  - export PREREQS_DIR=$(readlink -f $TRAVIS_BUILD_DIR/../installed)
+  - mkdir $PREREQS_DIR
+    
+  # Install TRIQS wo tests
+  - cd $TRAVIS_BUILD_DIR/..
+  - git clone https://github.com/TRIQS/triqs.git triqs.git
+  - mkdir triqs.build && pushd triqs.build
+  - |
+    cmake ../triqs.git \
+    -DCMAKE_BUILD_TYPE=Debug \
+    -DCMAKE_INSTALL_PREFIX=$PREREQS_DIR/triqs \
+    -DCMAKE_CXX_COMPILER=mpic++ \
+    -DBuild_Documentation=OFF \
+    -DBuild_Tests=OFF
+  - make -j3 install
+  - source $PREREQS_DIR/triqs/share/triqsvars.sh
+
+  # Install ALPSCore wo tests
+  - cd $TRAVIS_BUILD_DIR/..
+  - git clone https://github.com/ALPSCore/ALPSCore.git ALPSCore.git
+  - mkdir ALPSCore.build && pushd ALPSCore.build
+  - |
+    cmake ../ALPSCore.git                                 \
+    -DCMAKE_C_COMPILER=mpicc                              \
+    -DCMAKE_CXX_COMPILER=mpic++                           \
+    -DCMAKE_INSTALL_PREFIX=$PREREQS_DIR/ALPSCore          \
+    -DALPS_INSTALL_EIGEN=true                             \
+    -DTesting=false                                       \
+    -DENABLE_MPI=ON
+  - make -j3
+  - make install
+  - export ALPSCore_DIR=$PREREQS_DIR/ALPSCore
+   
+  # Build, test and install ALPSCore/CT-HYB
+  - cd $TRAVIS_BUILD_DIR/..
+  - mkdir build
+  - cd build
+  - |
+    cmake ../CT-HYB                                       \
+    -DCMAKE_BUILD_TYPE=Debug                              \
+    -DCMAKE_CXX_FLAGS='-DALPS_GF_DEBUG'                   \
+    -DCMAKE_C_COMPILER=mpicc                              \
+    -DCMAKE_CXX_COMPILER=mpic++                           \
+    -DCMAKE_INSTALL_PREFIX=$TRAVIS_BUILD_DIR/installed
+  - make -j3
+  - make test
+  - make install
