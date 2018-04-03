@@ -65,6 +65,7 @@ script:
     -DALPS_INSTALL_EIGEN=true                             \
     -DTesting=false                                       \
     -DDocumentation=OFF                                   \
+    -DALPS_CXX_STD=c++14                                  \
     -DENABLE_MPI=ON
   - make -j3
   - make install
