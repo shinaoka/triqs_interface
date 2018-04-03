@@ -55,6 +55,7 @@ script:
     -DCMAKE_INSTALL_PREFIX=$PREREQS_DIR/ALPSCore          \
     -DALPS_INSTALL_EIGEN=true                             \
     -DTesting=false                                       \
+    -DDocumentation=OFF                                   \
     -DENABLE_MPI=ON
   - make -j3
   - make install
