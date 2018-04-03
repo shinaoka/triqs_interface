@@ -60,6 +60,7 @@ script:
   - |
     cmake ../ALPSCore.git                                 \
     -DCMAKE_CXX_COMPILER=mpic++                           \
+    -DCMAKE_BUILD_TYPE=Debug \
     -DCMAKE_INSTALL_PREFIX=$PREREQS_DIR/ALPSCore          \
     -DALPS_INSTALL_EIGEN=true                             \
     -DTesting=false                                       \
@@ -82,6 +83,7 @@ script:
     -DCMAKE_INSTALL_PREFIX=$PREREQS_DIR/CT-HYB
   - make -j3
   - make install
+  - export ALPSCoreCTHYB_DIR=$PREREQS_DIR/CT-HYB
 
   # Build, test and install triqs_interface
   - cd $TRAVIS_BUILD_DIR/..
