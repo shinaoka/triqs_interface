@@ -44,7 +44,6 @@ script:
     -DBuild_Documentation=OFF \
     -DBuild_Tests=OFF
   - make -j3 install
-  - source $PREREQS_DIR/triqs/share/triqsvars.sh
 
   # Install ALPSCore wo tests
   - cd $TRAVIS_BUILD_DIR/..
@@ -52,7 +51,6 @@ script:
   - mkdir ALPSCore.build && pushd ALPSCore.build
   - |
     cmake ../ALPSCore.git                                 \
-    -DCMAKE_C_COMPILER=mpicc                              \
     -DCMAKE_CXX_COMPILER=mpic++                           \
     -DCMAKE_INSTALL_PREFIX=$PREREQS_DIR/ALPSCore          \
     -DALPS_INSTALL_EIGEN=true                             \
@@ -62,18 +60,31 @@ script:
   - make install
   - export ALPSCore_DIR=$PREREQS_DIR/ALPSCore
    
-  # Build, test and install ALPSCore/CT-HYB
+  # Build and install ALPSCore/CT-HYB
   - cd $TRAVIS_BUILD_DIR/..
-  - mkdir build
-  - cd build
+  - git clone https://github.com/ALPSCore/CT-HYB.git CT-HYB.git
+  - mkdir CT-HYB.build
+  - cd CT-HYB.build
   - |
-    cmake ../CT-HYB                                       \
+    cmake ../CT-HYB.git                                   \
     -DCMAKE_BUILD_TYPE=Debug                              \
     -DCMAKE_CXX_FLAGS='-DALPS_GF_DEBUG'                   \
-    -DCMAKE_C_COMPILER=mpicc                              \
     -DCMAKE_CXX_COMPILER=mpic++                           \
-    -DCMAKE_INSTALL_PREFIX=$TRAVIS_BUILD_DIR/installed
+    -DCMAKE_INSTALL_PREFIX=$PREREQS_DIR/CT-HYB
   - make -j3
-  - make test
+  - make install
+
+  # Build, test and install triqs_interface
+  - cd $TRAVIS_BUILD_DIR/..
+  - git clone https://github.com/shinaoka/triqs_interface.git triqs_interface.git
+  - mkdir triqs_interface.build
+  - cd triqs_interface.build
+  - |
+    cmake ../triqs_interface.git                          \
+    -DCMAKE_BUILD_TYPE=Debug                              \
+    -DCMAKE_CXX_FLAGS='-DALPS_GF_DEBUG'                   \
+    -DCMAKE_CXX_COMPILER=mpic++                           \
+    -DTRIQS_PATH=$PREREQS_DIR/triqs
+  - make -j3
   - make install
 
