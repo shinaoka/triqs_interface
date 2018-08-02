@@ -12,6 +12,15 @@ enable_testing()
 # Load TRIQS, including all predefined variables from TRIQS installation
 find_package(TRIQS REQUIRED)
 
+
+# Add the compiling options (-D... ) for C++
+#message(STATUS "TRIQS : Adding compilation flags detected by the library
+#(C++11/14, libc++, etc...) ")
+message(STATUS "Adding definitions from TRIQS: ${TRIQS_CXX_DEFINITIONS}")
+message(STATUS "Please confirm that the same C++ standard was used to build
+ALPSCOre libraries")
+add_definitions(${TRIQS_CXX_DEFINITIONS})
+
 # Load ALPSCore. If ALPSCore is not found
 # automatically, specify its location using:
 # export ALPSCore_DIR=/location/to/ALPSCORE/
@@ -28,13 +37,13 @@ set(CMAKE_INSTALL_PREFIX ${TRIQS_PATH})
 
 # Add the compiling options (-D... ) for C++
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
-  add_definitions(${TRIQS_CXX_DEFINITIONS} ${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_CXX_FLAGS} -DBOOST_DISABLE_ASSERTS)
+  add_definitions(${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_CXX_FLAGS} -DBOOST_DISABLE_ASSERTS)
 elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
-  add_definitions(${TRIQS_CXX_DEFINITIONS} ${CMAKE_CXX_FLAGS_DEBUG} ${CMAKE_CXX_FLAGS})
+  add_definitions(${CMAKE_CXX_FLAGS_DEBUG} ${CMAKE_CXX_FLAGS})
 elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-  add_definitions(${TRIQS_CXX_DEFINITIONS} ${CMAKE_CXX_FLAGS_RELWITHDEBINFO} ${CMAKE_CXX_FLAGS})
+  add_definitions(${CMAKE_CXX_FLAGS_RELWITHDEBINFO} ${CMAKE_CXX_FLAGS})
 elseif(CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
-  add_definitions(${TRIQS_CXX_DEFINITIONS} ${CMAKE_CXX_FLAGS_MINSIZEREL} ${CMAKE_CXX_FLAGS})
+  add_definitions(${CMAKE_CXX_FLAGS_MINSIZEREL} ${CMAKE_CXX_FLAGS})
 endif()
 
 # Options for the compilation ...
