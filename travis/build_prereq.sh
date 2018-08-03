@@ -23,7 +23,7 @@ else
     export CC=clang
     export CXX=clang++
     brew upgrade cmake
-    brew install --with-mpi --with-python --without-single boost
+    brew reinstall --with-mpi --with-python --without-single boost
     brew install hdf5 gsl gmp fftw open-mpi zmq
     pip install numpy
     pip install --no-binary=h5py h5py
