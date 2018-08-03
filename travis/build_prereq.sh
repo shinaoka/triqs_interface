@@ -13,9 +13,10 @@ if [[ "$TRAVIS_OS_NAME" != "osx" ]]; then
     sudo apt-get install -y cmake git libgfortran3 gfortran openmpi-bin openmpi-common openmpi-doc libopenmpi-dev libblas-dev liblapack-dev libfftw3-dev libgmp-dev hdf5-tools libhdf5-serial-dev python-h5py python-dev python-numpy python-scipy python-jinja2 python-virtualenv python-matplotlib python-tornado python-zmq python-mpi4py python-mako clang-format-3.9 libclang-3.9-dev python-clang-3.9 python-sphinx libjs-mathjax valgrind
 else
     brew cask uninstall oclint # TravisCI bug, see https://github.com/travis-ci/travis-ci/issues/8826#issuecomment-350103392
-    #brew upgrade pyenv
-    #pyenv install 2.7.15 # Use Python 2.7.15
-    #pyenv global 2.7.15
+    brew upgrade pyenv
+    pyenv install 2.7.15 # Use Python 2.7.15
+    pyenv global 2.7.15
+    python -m sysconfig | grep CONFIG_ARGS
     brew install llvm
     brew link --force llvm
     export PATH="/usr/local/opt/llvm/bin:$PATH"
