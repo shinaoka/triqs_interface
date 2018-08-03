@@ -15,6 +15,25 @@ if [[ "$TRAVIS_OS_NAME" != "osx" ]]; then
   - export OMPI_CXX=${CXX}
 else
     brew cask uninstall oclint # TravisCI bug, see https://github.com/travis-ci/travis-ci/issues/8826#issuecomment-350103392
-    brew install hdf5
-    brew list
+    brew install pyenv
+    pyenv install 2.7.15 # Use Python 2.7.15
+    pyenv global 2.7.15
+    brew install llvm
+    brew link --force llvm
+    echo 'export PATH="/usr/local/opt/llvm/bin:$PATH"' >> ~/.bashrc
+    echo 'export CC=clang' >> ~/.bashrc
+    echo 'export CXX=clang++' >> ~/.bashrc
+    source ~/.bashrc
+    brew install cmake
+    brew install --with-mpi --with-python --without-single boost
+    brew install hdf5 gsl gmp fftw open-mpi zmq
+    pip install numpy
+    pip install --no-binary=h5py h5py
+    pip install scipy
+    pip install --no-binary=mpi4py mpi4py
+    pip install matplotlib
+    pip install tornado
+    pip install pyzmq
+    pip install jinja2
+    pip install mako
 fi
