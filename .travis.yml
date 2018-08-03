@@ -35,6 +35,7 @@ script:
 
   # Create directory for installed prerequisites
   - export PREREQS_DIR=$(./travis/full_path.sh $TRAVIS_BUILD_DIR/../installed)
+  - echo $PREREQS_DIR
   - mkdir $PREREQS_DIR
     
   # Install TRIQS wo tests
