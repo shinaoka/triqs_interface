@@ -21,7 +21,7 @@ else
     export PATH="/usr/local/opt/llvm/bin:$PATH"
     export CC=clang
     export CXX=clang++
-    brew install cmake
+    brew upgrade cmake
     brew install --with-mpi --with-python --without-single boost
     brew install hdf5 gsl gmp fftw open-mpi zmq
     pip install numpy
