@@ -15,7 +15,7 @@ if [[ "$TRAVIS_OS_NAME" != "osx" ]]; then
   - export OMPI_CXX=${CXX}
 else
     brew cask uninstall oclint # TravisCI bug, see https://github.com/travis-ci/travis-ci/issues/8826#issuecomment-350103392
-    brew install pyenv
+    brew upgrade pyenv
     pyenv install 2.7.15 # Use Python 2.7.15
     pyenv global 2.7.15
     brew install llvm
