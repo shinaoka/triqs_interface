@@ -32,12 +32,13 @@ install: true
 script:
   # Stop on first error
   - set -e
+  - python -c "import fcntl; fcntl.fcntl(1, fcntl.F_SETFL, 0)" # work around for a bug in Travis CI https://github.com/travis-ci/travis-ci/issues/8920
 
   # Create directory for installed prerequisites
   - export PREREQS_DIR=$(./travis/full_path.sh $TRAVIS_BUILD_DIR/../installed)
   - echo $PREREQS_DIR
   - mkdir $PREREQS_DIR
-    
+  - ls $TRAVIS_BUILD_DIR/..
   # Install TRIQS wo tests
   - cd $TRAVIS_BUILD_DIR/..
   - git clone https://github.com/TRIQS/triqs.git triqs.git && pushd triqs.git
