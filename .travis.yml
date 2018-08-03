@@ -31,7 +31,7 @@ install: true
 
 script:
   # Stop on first error
-  - set -e
+  - set -ev
     #- python -c "import fcntl; fcntl.fcntl(1, fcntl.F_SETFL, 0)" # work around for a bug in Travis CI https://github.com/travis-ci/travis-ci/issues/8920
 
   # Create directory for installed prerequisites
